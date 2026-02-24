@@ -6,25 +6,43 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LiveAlert } from "@/lib/mockData";
 
-/* ── Custom marker icons ── */
-function makeIcon(color: string, size: number = 28) {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${size}" height="${size}"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>`;
+/* ── Glowing SOS pin icon ── */
+function makeSOSIcon(color: string, glowColor: string, size: number = 30) {
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 42" width="${size}" height="${size * 1.35}">
+      <defs>
+        <filter id="glow-${color.replace("#", "")}" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feFlood flood-color="${glowColor}" flood-opacity="0.7" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge>
+            <feMergeNode in="shadow"/>
+            <feMergeNode in="shadow"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <path d="M16 2C9.37 2 4 7.37 4 14c0 8.4 12 24 12 24s12-15.6 12-24c0-6.63-5.37-12-12-12z"
+            fill="${color}" filter="url(#glow-${color.replace("#", "")})" opacity="0.95"/>
+      <circle cx="16" cy="14" r="5" fill="white" opacity="0.9"/>
+    </svg>`;
+
     return L.divIcon({
         html: svg,
         className: "",
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size],
-        popupAnchor: [0, -size],
+        iconSize: [size, size * 1.35],
+        iconAnchor: [size / 2, size * 1.35],
+        popupAnchor: [0, -(size * 1.35)],
     });
 }
 
-const urgencyColor: Record<LiveAlert["urgency"], string> = {
-    critical: "#ef4444",
-    rescue: "#f97316",
-    info: "#3b82f6",
+const urgencyColor: Record<LiveAlert["urgency"], { fill: string; glow: string }> = {
+    critical: { fill: "#ef4444", glow: "#ff0000" },
+    rescue: { fill: "#f97316", glow: "#ff6600" },
+    info: { fill: "#3b82f6", glow: "#0066ff" },
 };
 
-/* ── Helper: fly to selected alert ── */
+/* ── Fly to selected ── */
 function FlyTo({ alert }: { alert: LiveAlert | null }) {
     const map = useMap();
     useEffect(() => {
@@ -35,17 +53,19 @@ function FlyTo({ alert }: { alert: LiveAlert | null }) {
     return null;
 }
 
-/* ── Main MapView ── */
+/* ── MapView ── */
 interface MapViewProps {
     alerts: LiveAlert[];
     selectedAlert: LiveAlert | null;
     onSelectAlert: (alert: LiveAlert) => void;
+    className?: string;
 }
 
 export default function MapView({
     alerts,
     selectedAlert,
     onSelectAlert,
+    className = "",
 }: MapViewProps) {
     const center: [number, number] = [34.055, -118.255];
 
@@ -53,21 +73,22 @@ export default function MapView({
         <MapContainer
             center={center}
             zoom={12}
-            className="h-full w-full rounded-lg"
-            style={{ background: "#0f172a" }}
+            className={`h-full w-full ${className}`}
+            style={{ background: "#0a0e1a" }}
             zoomControl={false}
         >
             <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
             <FlyTo alert={selectedAlert} />
 
             {alerts.map((alert) => {
                 const isSelected = selectedAlert?.id === alert.id;
-                const icon = makeIcon(
-                    urgencyColor[alert.urgency],
-                    isSelected ? 40 : 28
+                const colors = urgencyColor[alert.urgency];
+                const icon = makeSOSIcon(
+                    colors.fill,
+                    colors.glow,
+                    isSelected ? 38 : 28
                 );
 
                 return (
@@ -80,10 +101,9 @@ export default function MapView({
                         }}
                     >
                         <Popup>
-                            <div className="text-xs">
-                                <strong>{alert.title}</strong>
-                                <br />
-                                {alert.need}
+                            <div className="text-xs p-1">
+                                <strong className="text-white">{alert.title}</strong>
+                                <p className="text-gray-300 mt-1 mb-0">{alert.need}</p>
                             </div>
                         </Popup>
                     </Marker>
