@@ -3,22 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Settings, Sun, Moon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Settings, Sun, Moon, BarChart3, Wifi } from "lucide-react";
 import { useTheme } from "./ThemeContext";
 
-const links = [
+const operationalLinks = [
     { label: "Live Triage", href: "/" },
     { label: "Map View", href: "/map" },
-    { label: "Analytics", href: "/analytics" },
-    { label: "Network Status", href: "/network" },
+    { label: "Resolved", href: "/resolved" },
+];
+
+const advancedLinks = [
+    { label: "Analytics", href: "/analytics", icon: BarChart3 },
+    { label: "Network Status", href: "/network", icon: Wifi },
 ];
 
 export default function GlassNav() {
     const pathname = usePathname();
     const { theme, toggleTheme } = useTheme();
-    const [showSettings, setShowSettings] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const isAdvancedMode =
+        pathname === "/analytics" || pathname === "/network";
+
+    const activeLinks = isAdvancedMode ? advancedLinks : operationalLinks;
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -27,31 +36,31 @@ export default function GlassNav() {
                 dropdownRef.current &&
                 !dropdownRef.current.contains(e.target as Node)
             ) {
-                setShowSettings(false);
+                setIsDropdownOpen(false);
             }
         }
-        if (showSettings) {
+        if (isDropdownOpen) {
             document.addEventListener("mousedown", handleClickOutside);
         }
         return () =>
             document.removeEventListener("mousedown", handleClickOutside);
-    }, [showSettings]);
+    }, [isDropdownOpen]);
 
     // Close on Escape
     useEffect(() => {
         function handleEsc(e: KeyboardEvent) {
-            if (e.key === "Escape") setShowSettings(false);
+            if (e.key === "Escape") setIsDropdownOpen(false);
         }
-        if (showSettings) {
+        if (isDropdownOpen) {
             document.addEventListener("keydown", handleEsc);
         }
         return () => document.removeEventListener("keydown", handleEsc);
-    }, [showSettings]);
+    }, [isDropdownOpen]);
 
     return (
         <div className="relative" ref={dropdownRef}>
             <nav className="glass-pill px-2 py-1.5 flex items-center gap-1">
-                {/* Brand */}
+                {/* Brand — always resets to home */}
                 <Link
                     href="/"
                     className="px-4 py-1.5 text-sm font-bold tracking-wider theme-heading select-none mr-2"
@@ -62,16 +71,16 @@ export default function GlassNav() {
                 {/* Divider */}
                 <div className="w-px h-5 theme-divider-strong bg-current opacity-30 mr-1" />
 
-                {/* Links */}
-                {links.map(({ label, href }) => {
-                    const isActive = href !== "#" && pathname === href;
+                {/* Dynamic main links */}
+                {activeLinks.map(({ label, href }) => {
+                    const isActive = pathname === href;
                     return (
                         <Link
                             key={label}
                             href={href}
                             className={`relative px-4 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 ${isActive
-                                    ? "text-white"
-                                    : "theme-dim hover:theme-heading hover:bg-[var(--surface-hover)]"
+                                ? "text-white font-bold"
+                                : "text-white/50 hover:text-white/80 hover:bg-[var(--surface-hover)]"
                                 }`}
                         >
                             {isActive && (
@@ -91,65 +100,89 @@ export default function GlassNav() {
                 })}
 
                 {/* Divider */}
-                <div className="w-px h-5 theme-divider-strong bg-current opacity-30 ml-1" />
+                <div className="w-px h-6 bg-white/10 ml-1" />
 
-                {/* Settings button */}
+                {/* Settings / More Options button */}
                 <button
-                    onClick={() => setShowSettings((prev) => !prev)}
-                    className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${showSettings
+                    onClick={() => setIsDropdownOpen((prev) => !prev)}
+                    className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${isDropdownOpen
                         ? "bg-[var(--surface-active)] theme-heading"
                         : "theme-dim hover:theme-heading hover:bg-[var(--surface-hover)]"
                         }`}
-                    aria-label="Settings"
+                    aria-label="More options"
                     id="settings-button"
                 >
                     <Settings className="h-3.5 w-3.5" />
                 </button>
             </nav>
 
-            {/* Settings dropdown */}
-            {showSettings && (
-                <div
-                    className="absolute right-0 top-full mt-2 w-56 glass p-3 z-50 animate-fade-in-up"
-                    style={{ animationDuration: "0.2s" }}
-                >
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider theme-dim mb-3">
-                        Settings
-                    </h4>
+            {/* Dropdown menu */}
+            <AnimatePresence>
+                {isDropdownOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute right-0 mt-4 w-48 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl p-2 shadow-2xl z-50"
+                    >
+                        {/* Show advanced links only in Operational mode */}
+                        {!isAdvancedMode && (
+                            <>
+                                {advancedLinks.map(
+                                    ({ label, href, icon: Icon }) => (
+                                        <Link
+                                            key={label}
+                                            href={href}
+                                            onClick={() =>
+                                                setIsDropdownOpen(false)
+                                            }
+                                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        >
+                                            <Icon className="h-3.5 w-3.5" />
+                                            {label}
+                                        </Link>
+                                    )
+                                )}
 
-                    {/* Theme toggle */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            {theme === "dark" ? (
-                                <Moon className="h-3.5 w-3.5 text-blue-400" />
-                            ) : (
-                                <Sun className="h-3.5 w-3.5 text-amber-500" />
-                            )}
-                            <span className="text-xs font-medium theme-text">
-                                {theme === "dark" ? "Dark Mode" : "Light Mode"}
-                            </span>
-                        </div>
+                                {/* Divider */}
+                                <div className="border-t border-white/10 my-1" />
+                            </>
+                        )}
 
-                        {/* Toggle switch */}
-                        <button
-                            onClick={toggleTheme}
-                            className={`relative w-10 h-5 rounded-full transition-colors duration-300 cursor-pointer ${theme === "light"
-                                ? "bg-amber-500"
-                                : "bg-slate-600"
-                                }`}
-                            aria-label="Toggle theme"
-                            id="theme-toggle"
-                        >
-                            <span
-                                className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-300 ${theme === "light"
-                                    ? "translate-x-5"
-                                    : "translate-x-0"
+                        {/* Theme Toggle — always visible */}
+                        <div className="flex items-center justify-between px-4 py-2">
+                            <div className="flex items-center gap-2">
+                                {theme === "dark" ? (
+                                    <Moon className="h-3.5 w-3.5 text-blue-400" />
+                                ) : (
+                                    <Sun className="h-3.5 w-3.5 text-amber-500" />
+                                )}
+                                <span className="text-sm text-white/70">
+                                    {theme === "dark" ? "Dark" : "Light"}
+                                </span>
+                            </div>
+
+                            <button
+                                onClick={toggleTheme}
+                                className={`relative w-10 h-5 rounded-full transition-colors duration-300 cursor-pointer ${theme === "light"
+                                    ? "bg-amber-500"
+                                    : "bg-slate-600"
                                     }`}
-                            />
-                        </button>
-                    </div>
-                </div>
-            )}
+                                aria-label="Toggle theme"
+                                id="theme-toggle"
+                            >
+                                <span
+                                    className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-300 ${theme === "light"
+                                        ? "translate-x-5"
+                                        : "translate-x-0"
+                                        }`}
+                                />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
