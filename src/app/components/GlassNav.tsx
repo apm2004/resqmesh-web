@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "./ThemeContext";
 
 const links = [
     { label: "Live Triage", href: "/" },
     { label: "Map View", href: "/map" },
-    { label: "Analytics", href: "#" },
-    { label: "Network Status", href: "#" },
+    { label: "Analytics", href: "/analytics" },
+    { label: "Network Status", href: "/network" },
 ];
 
 export default function GlassNav() {
@@ -68,12 +69,23 @@ export default function GlassNav() {
                         <Link
                             key={label}
                             href={href}
-                            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${isActive
-                                    ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-red-500/20"
+                            className={`relative px-4 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 ${isActive
+                                    ? "text-white"
                                     : "theme-dim hover:theme-heading hover:bg-[var(--surface-hover)]"
                                 }`}
                         >
-                            {label}
+                            {isActive && (
+                                <motion.span
+                                    layoutId="nav-pill"
+                                    className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-red-500 shadow-lg shadow-red-500/20"
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 380,
+                                        damping: 30,
+                                    }}
+                                />
+                            )}
+                            <span className="relative z-10">{label}</span>
                         </Link>
                     );
                 })}
@@ -85,8 +97,8 @@ export default function GlassNav() {
                 <button
                     onClick={() => setShowSettings((prev) => !prev)}
                     className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${showSettings
-                            ? "bg-[var(--surface-active)] theme-heading"
-                            : "theme-dim hover:theme-heading hover:bg-[var(--surface-hover)]"
+                        ? "bg-[var(--surface-active)] theme-heading"
+                        : "theme-dim hover:theme-heading hover:bg-[var(--surface-hover)]"
                         }`}
                     aria-label="Settings"
                     id="settings-button"
@@ -122,16 +134,16 @@ export default function GlassNav() {
                         <button
                             onClick={toggleTheme}
                             className={`relative w-10 h-5 rounded-full transition-colors duration-300 cursor-pointer ${theme === "light"
-                                    ? "bg-amber-500"
-                                    : "bg-slate-600"
+                                ? "bg-amber-500"
+                                : "bg-slate-600"
                                 }`}
                             aria-label="Toggle theme"
                             id="theme-toggle"
                         >
                             <span
                                 className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-300 ${theme === "light"
-                                        ? "translate-x-5"
-                                        : "translate-x-0"
+                                    ? "translate-x-5"
+                                    : "translate-x-0"
                                     }`}
                             />
                         </button>
