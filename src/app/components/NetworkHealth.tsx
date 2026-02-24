@@ -45,7 +45,7 @@ const stats: Stat[] = [
 export default function NetworkHealth() {
     return (
         <div className="glass p-4 animate-fade-in-up">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider theme-dim mb-3 flex items-center gap-2">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse-glow" />
                 Network Health
             </h3>
@@ -58,7 +58,7 @@ export default function NetworkHealth() {
                             <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-1.5">
                                     <s.icon className={`h-3 w-3 ${s.color}`} />
-                                    <span className="text-[11px] text-slate-300">
+                                    <span className="text-[11px] theme-muted">
                                         {s.label}
                                     </span>
                                 </div>
@@ -73,7 +73,7 @@ export default function NetworkHealth() {
                                         key={i}
                                         className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < Math.round(pct / 5)
                                                 ? `${s.barColor} opacity-90`
-                                                : "bg-white/5"
+                                                : "theme-bar-track"
                                             }`}
                                     />
                                 ))}

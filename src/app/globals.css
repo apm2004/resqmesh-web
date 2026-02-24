@@ -1,10 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
-/* ── Dark HUD Variables ── */
+/* ── Dark HUD Variables (default) ── */
 :root {
   --background: #0a0e1a;
   --foreground: #e2e8f0;
+  --heading: #ffffff;
+  --text-primary: #e2e8f0;
+  --text-muted: #cbd5e1;
+  --text-dim: #64748b;
+  --text-dimmer: #475569;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --surface-active: rgba(255, 255, 255, 0.10);
+  --divider: rgba(255, 255, 255, 0.05);
+  --divider-strong: rgba(255, 255, 255, 0.10);
   --glass-bg: rgba(0, 0, 0, 0.4);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-border-hover: rgba(255, 255, 255, 0.15);
@@ -13,6 +23,44 @@
   --glow-green: rgba(34, 197, 94, 0.45);
   --glow-blue: rgba(59, 130, 246, 0.45);
   --glow-amber: rgba(245, 158, 11, 0.45);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+  --map-bg: #0a0e1a;
+  --popup-bg: rgba(0, 0, 0, 0.8);
+  --popup-border: rgba(255, 255, 255, 0.1);
+  --popup-text: #e2e8f0;
+  --bar-track: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Light Theme Variables ── */
+[data-theme="light"] {
+  --background: #f0f2f5;
+  --foreground: #1e293b;
+  --heading: #0f172a;
+  --text-primary: #1e293b;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+  --text-dimmer: #94a3b8;
+  --surface: rgba(0, 0, 0, 0.04);
+  --surface-hover: rgba(0, 0, 0, 0.07);
+  --surface-active: rgba(0, 0, 0, 0.10);
+  --divider: rgba(0, 0, 0, 0.06);
+  --divider-strong: rgba(0, 0, 0, 0.10);
+  --glass-bg: rgba(255, 255, 255, 0.60);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-hover: rgba(0, 0, 0, 0.15);
+  --glow-red: rgba(239, 68, 68, 0.35);
+  --glow-orange: rgba(249, 115, 22, 0.35);
+  --glow-green: rgba(34, 197, 94, 0.30);
+  --glow-blue: rgba(59, 130, 246, 0.30);
+  --glow-amber: rgba(245, 158, 11, 0.30);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+  --map-bg: #e8ecf0;
+  --popup-bg: rgba(255, 255, 255, 0.92);
+  --popup-border: rgba(0, 0, 0, 0.1);
+  --popup-text: #1e293b;
+  --bar-track: rgba(0, 0, 0, 0.06);
 }
 
 @theme inline {
@@ -34,6 +82,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ── Glass Panel Base ── */
@@ -43,6 +92,7 @@ body {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
   border-radius: 1rem;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .glass-pill {
@@ -51,6 +101,7 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   border-radius: 9999px;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 /* ── Glow Shadows ── */
@@ -218,17 +269,17 @@ body {
 }
 
 .hud-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--scrollbar-thumb);
   border-radius: 9999px;
 }
 
 .hud-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* ── Leaflet Overrides ── */
 .leaflet-container {
-  background: #0a0e1a !important;
+  background: var(--map-bg) !important;
 }
 
 .leaflet-control-attribution {
@@ -236,19 +287,68 @@ body {
 }
 
 .leaflet-popup-content-wrapper {
-  background: rgba(0, 0, 0, 0.8) !important;
+  background: var(--popup-bg) !important;
   backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--popup-border) !important;
   border-radius: 0.75rem !important;
-  color: #e2e8f0 !important;
+  color: var(--popup-text) !important;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5) !important;
 }
 
 .leaflet-popup-tip {
-  background: rgba(0, 0, 0, 0.8) !important;
+  background: var(--popup-bg) !important;
 }
 
 /* ── Progress Bar Glow ── */
 .progress-glow {
   box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+}
+
+/* ── Theme-aware utility classes ── */
+.theme-heading {
+  color: var(--heading);
+}
+
+.theme-text {
+  color: var(--text-primary);
+}
+
+.theme-muted {
+  color: var(--text-muted);
+}
+
+.theme-dim {
+  color: var(--text-dim);
+}
+
+.theme-dimmer {
+  color: var(--text-dimmer);
+}
+
+.theme-surface {
+  background: var(--surface);
+}
+
+.theme-surface-hover:hover {
+  background: var(--surface-hover);
+}
+
+.theme-surface-active {
+  background: var(--surface-active);
+}
+
+.theme-divider {
+  border-color: var(--divider);
+}
+
+.theme-divider-strong {
+  border-color: var(--divider-strong);
+}
+
+.theme-bg {
+  background: var(--background);
+}
+
+.theme-bar-track {
+  background: var(--bar-track);
 }

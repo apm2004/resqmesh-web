@@ -15,7 +15,7 @@ export default function HUDDashboard() {
   const [selectedAlert, setSelectedAlert] = useState<LiveAlert | null>(null);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-[#0a0e1a]">
+    <div className="relative w-screen h-screen overflow-hidden theme-bg">
       {/* ═══ Layer 0: Full-bleed dark map ═══ */}
       <div className="absolute inset-0 z-0">
         <MapView

@@ -22,17 +22,17 @@ export default function TriageFeed({
     return (
         <div className="glass flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="px-4 pt-4 pb-3 border-b border-white/5">
+            <div className="px-4 pt-4 pb-3 border-b theme-divider">
                 <div className="flex items-center gap-2 mb-1">
                     <span className="relative flex h-2.5 w-2.5">
                         <span className="animate-ping-ring absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 animate-pulse-glow" />
                     </span>
-                    <h2 className="text-white text-sm font-bold tracking-wide uppercase">
+                    <h2 className="theme-heading text-sm font-bold tracking-wide uppercase">
                         Live Triage Queue
                     </h2>
                 </div>
-                <p className="text-slate-500 text-[11px]">
+                <p className="theme-dim text-[11px]">
                     {alerts.length} active alerts &middot; Sorted by urgency
                 </p>
             </div>
@@ -46,8 +46,8 @@ export default function TriageFeed({
                             key={alert.id}
                             onClick={() => onSelectAlert(alert)}
                             className={`${urgencyBorderClass[alert.urgency]} rounded-xl p-3 cursor-pointer transition-all duration-200 animate-slide-in ${isSelected
-                                    ? "bg-white/10 ring-1 ring-white/20"
-                                    : "bg-white/[0.03] hover:bg-white/[0.07]"
+                                    ? "theme-surface-active ring-1 ring-[var(--divider-strong)]"
+                                    : "theme-surface theme-surface-hover"
                                 }`}
                             style={{ animationDelay: `${i * 60}ms` }}
                         >
@@ -77,12 +77,12 @@ export default function TriageFeed({
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-white text-xs font-semibold leading-snug mb-1">
+                            <h3 className="theme-heading text-xs font-semibold leading-snug mb-1">
                                 {alert.title}
                             </h3>
 
                             {/* Time + location */}
-                            <div className="flex items-center justify-between text-[10px] text-slate-500">
+                            <div className="flex items-center justify-between text-[10px] theme-dim">
                                 <span>{alert.time}</span>
                                 <span className="truncate ml-2 max-w-[120px]">
                                     {alert.location}

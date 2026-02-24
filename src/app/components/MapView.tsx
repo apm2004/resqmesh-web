@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LiveAlert } from "@/lib/mockData";
+import { useTheme } from "./ThemeContext";
 
 /* ── Glowing SOS pin icon ── */
 function makeSOSIcon(color: string, glowColor: string, size: number = 30) {
@@ -42,6 +43,11 @@ const urgencyColor: Record<LiveAlert["urgency"], { fill: string; glow: string }>
     info: { fill: "#3b82f6", glow: "#0066ff" },
 };
 
+const tileUrls = {
+    dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    light: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+};
+
 /* ── Fly to selected ── */
 function FlyTo({ alert }: { alert: LiveAlert | null }) {
     const map = useMap();
@@ -68,17 +74,19 @@ export default function MapView({
     className = "",
 }: MapViewProps) {
     const center: [number, number] = [34.055, -118.255];
+    const { theme } = useTheme();
 
     return (
         <MapContainer
             center={center}
             zoom={12}
             className={`h-full w-full ${className}`}
-            style={{ background: "#0a0e1a" }}
+            style={{ background: "var(--map-bg)" }}
             zoomControl={false}
         >
             <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                key={theme}
+                url={tileUrls[theme]}
             />
             <FlyTo alert={selectedAlert} />
 
@@ -102,8 +110,8 @@ export default function MapView({
                     >
                         <Popup>
                             <div className="text-xs p-1">
-                                <strong className="text-white">{alert.title}</strong>
-                                <p className="text-gray-300 mt-1 mb-0">{alert.need}</p>
+                                <strong className="theme-heading">{alert.title}</strong>
+                                <p className="theme-muted mt-1 mb-0">{alert.need}</p>
                             </div>
                         </Popup>
                     </Marker>

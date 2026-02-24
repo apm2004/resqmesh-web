@@ -35,7 +35,7 @@ const bars: BarStat[] = [
 export default function DisasterAnalytics() {
     return (
         <div className="glass p-4 animate-fade-in-up">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider theme-dim mb-3">
                 Disaster Analytics
             </h3>
 
@@ -43,14 +43,14 @@ export default function DisasterAnalytics() {
                 {bars.map((b) => (
                     <div key={b.label}>
                         <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] text-slate-300">
+                            <span className="text-[11px] theme-muted">
                                 {b.label}
                             </span>
                             <span className={`text-[11px] font-bold ${b.textColor}`}>
                                 {b.value}
                             </span>
                         </div>
-                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-2 w-full theme-bar-track rounded-full overflow-hidden">
                             <div
                                 className={`h-full rounded-full ${b.gradient} transition-all duration-1000 ease-out`}
                                 style={{ width: `${b.pct}%` }}

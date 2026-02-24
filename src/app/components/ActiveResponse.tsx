@@ -23,7 +23,7 @@ function Waveform() {
 export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
     return (
         <div className="glass p-4 animate-fade-in-up">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider theme-dim mb-3">
                 Active Response
             </h3>
 
@@ -42,21 +42,21 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
                             >
                                 {selectedAlert.urgency}
                             </span>
-                            <span className="text-slate-500 text-[10px]">
+                            <span className="theme-dim text-[10px]">
                                 {selectedAlert.id}
                             </span>
                         </div>
-                        <h4 className="text-white text-sm font-semibold mb-1">
+                        <h4 className="theme-heading text-sm font-semibold mb-1">
                             {selectedAlert.title}
                         </h4>
-                        <p className="text-slate-400 text-[11px] leading-relaxed line-clamp-2">
+                        <p className="theme-muted text-[11px] leading-relaxed line-clamp-2">
                             {selectedAlert.fullMessage}
                         </p>
                     </div>
 
                     {/* Needs */}
-                    <div className="bg-white/[0.03] rounded-lg px-3 py-2 border border-white/5">
-                        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                    <div className="theme-surface rounded-lg px-3 py-2 border theme-divider">
+                        <span className="text-[10px] theme-dim uppercase tracking-wider font-semibold">
                             Resources
                         </span>
                         <p className="text-orange-300 text-xs mt-0.5 font-medium">
@@ -65,13 +65,13 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
                     </div>
 
                     {/* Radio comms strip */}
-                    <div className="flex items-center gap-3 bg-white/[0.03] rounded-lg px-3 py-2 border border-white/5">
+                    <div className="flex items-center gap-3 theme-surface rounded-lg px-3 py-2 border theme-divider">
                         <Waveform />
                         <div className="flex-1 min-w-0">
                             <p className="text-green-400 text-[10px] font-semibold">
                                 Rescue Team Alpha
                             </p>
-                            <p className="text-slate-500 text-[10px] truncate">
+                            <p className="theme-dim text-[10px] truncate">
                                 En Route — ETA 4 min
                             </p>
                         </div>
@@ -83,7 +83,7 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
                         <button className="flex-1 text-[11px] font-semibold py-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white hover:brightness-110 transition cursor-pointer">
                             Acknowledge
                         </button>
-                        <button className="flex-1 text-[11px] font-semibold py-1.5 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10 transition cursor-pointer">
+                        <button className="flex-1 text-[11px] font-semibold py-1.5 rounded-lg theme-surface theme-muted hover:bg-[var(--surface-hover)] border theme-divider-strong transition cursor-pointer">
                             Escalate
                         </button>
                     </div>
@@ -91,31 +91,31 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
             ) : (
                 /* Default state */
                 <div className="space-y-3">
-                    <div className="flex items-center gap-3 bg-white/[0.03] rounded-lg px-3 py-2.5 border border-white/5">
+                    <div className="flex items-center gap-3 theme-surface rounded-lg px-3 py-2.5 border theme-divider">
                         <Waveform />
                         <div className="flex-1 min-w-0">
                             <p className="text-green-400 text-[10px] font-semibold">
                                 Rescue Team Alpha
                             </p>
-                            <p className="text-slate-500 text-[10px] truncate">
+                            <p className="theme-dim text-[10px] truncate">
                                 En Route to Main St. — ETA 4 min
                             </p>
                         </div>
                         <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse-glow" />
                     </div>
-                    <div className="flex items-center gap-3 bg-white/[0.03] rounded-lg px-3 py-2.5 border border-white/5">
+                    <div className="flex items-center gap-3 theme-surface rounded-lg px-3 py-2.5 border theme-divider">
                         <Waveform />
                         <div className="flex-1 min-w-0">
                             <p className="text-amber-400 text-[10px] font-semibold">
                                 Medical Unit Bravo
                             </p>
-                            <p className="text-slate-500 text-[10px] truncate">
+                            <p className="theme-dim text-[10px] truncate">
                                 On Scene — Sector 7
                             </p>
                         </div>
                         <span className="flex-shrink-0 w-2 h-2 rounded-full bg-amber-500 animate-pulse-glow" />
                     </div>
-                    <p className="text-slate-600 text-[10px] text-center mt-1">
+                    <p className="theme-dimmer text-[10px] text-center mt-1">
                         Select an alert for full details
                     </p>
                 </div>

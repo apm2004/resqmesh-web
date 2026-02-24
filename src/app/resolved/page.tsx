@@ -55,12 +55,12 @@ const resolvedAlerts = [
 
 export default function ResolvedPage() {
     return (
-        <div className="min-h-[calc(100vh-73px)] bg-slate-900 px-6 py-6">
+        <div className="min-h-[calc(100vh-73px)] theme-bg px-6 py-6">
             <div className="max-w-3xl mx-auto">
-                <h1 className="text-white text-2xl font-bold mb-1">
+                <h1 className="theme-heading text-2xl font-bold mb-1">
                     Resolved Emergencies
                 </h1>
-                <p className="text-slate-400 text-sm mb-6">
+                <p className="theme-muted text-sm mb-6">
                     {resolvedAlerts.length} incidents successfully resolved
                 </p>
 
@@ -68,7 +68,7 @@ export default function ResolvedPage() {
                     {resolvedAlerts.map((alert) => (
                         <div
                             key={alert.id}
-                            className="bg-slate-800 border border-slate-700/50 rounded-lg p-4 flex items-start gap-4 transition-colors duration-150 hover:border-green-500/30"
+                            className="theme-surface border theme-divider-strong rounded-lg p-4 flex items-start gap-4 transition-colors duration-150 hover:border-green-500/30"
                         >
                             {/* Green checkmark */}
                             <div className="mt-0.5 flex-shrink-0">
@@ -77,11 +77,11 @@ export default function ResolvedPage() {
 
                             {/* Details */}
                             <div className="flex-1 min-w-0">
-                                <h3 className="text-white font-semibold text-sm leading-snug">
+                                <h3 className="theme-heading font-semibold text-sm leading-snug">
                                     {alert.title}
                                 </h3>
 
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs theme-muted">
                                     <span className="inline-flex items-center gap-1">
                                         <MapPin className="h-3 w-3" />
                                         {alert.location}
@@ -95,7 +95,7 @@ export default function ResolvedPage() {
                             </div>
 
                             {/* Resolved timestamp */}
-                            <span className="flex-shrink-0 text-xs text-slate-500 whitespace-nowrap">
+                            <span className="flex-shrink-0 text-xs theme-dim whitespace-nowrap">
                                 {alert.resolvedAt}
                             </span>
                         </div>

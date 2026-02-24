@@ -41,18 +41,18 @@ const stats = [
 
 export default function ProfilePage() {
     return (
-        <div className="min-h-[calc(100vh-73px)] bg-slate-900 px-6 py-8">
+        <div className="min-h-[calc(100vh-73px)] theme-bg px-6 py-8">
             <div className="max-w-2xl mx-auto">
                 {/* Profile header */}
                 <div className="flex items-center gap-5 mb-8">
-                    <div className="flex-shrink-0 rounded-full bg-slate-800 border border-slate-700 p-3">
-                        <UserCircle className="h-16 w-16 text-slate-400" />
+                    <div className="flex-shrink-0 rounded-full theme-surface border theme-divider-strong p-3">
+                        <UserCircle className="h-16 w-16 theme-dim" />
                     </div>
                     <div>
-                        <h1 className="text-white text-2xl font-bold">
+                        <h1 className="theme-heading text-2xl font-bold">
                             Operator Delta-7
                         </h1>
-                        <p className="text-slate-400 text-sm mt-0.5">
+                        <p className="theme-muted text-sm mt-0.5">
                             Search &amp; Rescue Command &middot; Active since Jan 2025
                         </p>
                         <span className="inline-block mt-2 px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-green-500/15 text-green-400 uppercase tracking-wide">
@@ -66,7 +66,7 @@ export default function ProfilePage() {
                     {stats.map((s) => (
                         <div
                             key={s.label}
-                            className="bg-slate-800 border border-slate-700/50 rounded-lg p-4 flex items-center gap-4"
+                            className="theme-surface border theme-divider-strong rounded-lg p-4 flex items-center gap-4"
                         >
                             <div
                                 className={`flex-shrink-0 rounded-lg p-2.5 ${s.bg}`}
@@ -74,10 +74,10 @@ export default function ProfilePage() {
                                 <s.icon className={`h-5 w-5 ${s.color}`} />
                             </div>
                             <div>
-                                <p className="text-slate-400 text-xs">
+                                <p className="theme-muted text-xs">
                                     {s.label}
                                 </p>
-                                <p className="text-white text-lg font-bold leading-tight">
+                                <p className="theme-heading text-lg font-bold leading-tight">
                                     {s.value}
                                 </p>
                             </div>
@@ -86,7 +86,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Recent activity */}
-                <h2 className="text-white font-semibold text-sm mb-3">
+                <h2 className="theme-heading font-semibold text-sm mb-3">
                     Recent Activity
                 </h2>
                 <div className="space-y-2">
@@ -109,15 +109,15 @@ export default function ProfilePage() {
                     ].map((item) => (
                         <div
                             key={item.target}
-                            className="bg-slate-800/60 rounded-md px-4 py-3 flex items-center justify-between text-sm"
+                            className="theme-surface rounded-md px-4 py-3 flex items-center justify-between text-sm"
                         >
-                            <span className="text-slate-300">
+                            <span className="theme-muted">
                                 <span className="text-blue-400 font-medium">
                                     {item.action}
                                 </span>{" "}
                                 {item.target}
                             </span>
-                            <span className="text-slate-500 text-xs">
+                            <span className="theme-dim text-xs">
                                 {item.time}
                             </span>
                         </div>
