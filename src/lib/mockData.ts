@@ -21,8 +21,8 @@ export const liveAlerts: LiveAlert[] = [
         title: "Building Collapse — Sector 7",
         time: "2 min ago",
         location: "34.0522° N, 118.2437° W",
-        lat: 34.0522,
-        lng: -118.2437,
+        lat: 10.0488437,
+        lng: 76.3052912,
         need: "Heavy rescue team, medical",
         fullMessage:
             "Multiple-storey residential building collapsed after aftershock. Survivors heard under rubble on floors 2-3. Immediate heavy-lift equipment and trauma medics required. Access via Main St blocked — reroute through 5th Ave.",
