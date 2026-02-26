@@ -1,6 +1,7 @@
 "use client";
 
 import GlassNav from "../components/GlassNav";
+import { useAlerts } from "@/context/AlertContext";
 
 const services = [
     { name: "NLP AI Engine", status: "Operational", color: "bg-green-500" },
@@ -17,6 +18,10 @@ const services = [
 ];
 
 export default function NetworkPage() {
+    const { activeAlerts } = useAlerts();
+    const meshRouting = activeAlerts.filter((a) => a.source === "mesh").length;
+    const socialProcessing = activeAlerts.filter((a) => a.source === "social").length;
+
     return (
         <div className="relative w-screen h-screen overflow-hidden theme-bg">
             {/* Nav */}
@@ -49,18 +54,18 @@ export default function NetworkPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-100 dark:bg-white/[0.03] rounded-xl p-4 border border-slate-200 dark:border-white/5">
                                     <p className="text-slate-400 dark:text-white/40 text-[10px] uppercase tracking-wider font-semibold mb-1">
-                                        Active Mobile Nodes
+                                        Active Mesh Alerts Routing
                                     </p>
                                     <p className="text-3xl font-bold text-green-400">
-                                        847
+                                        {meshRouting}
                                     </p>
                                 </div>
                                 <div className="bg-slate-100 dark:bg-white/[0.03] rounded-xl p-4 border border-slate-200 dark:border-white/5">
                                     <p className="text-slate-400 dark:text-white/40 text-[10px] uppercase tracking-wider font-semibold mb-1">
-                                        Offline Syncs Queued
+                                        Social NLP Processing
                                     </p>
                                     <p className="text-3xl font-bold text-amber-400">
-                                        124
+                                        {socialProcessing}
                                     </p>
                                 </div>
                             </div>

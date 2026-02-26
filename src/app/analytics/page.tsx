@@ -1,54 +1,100 @@
 "use client";
 
 import GlassNav from "../components/GlassNav";
-
-const kpis = [
-    { label: "Total Alerts Processed", value: "1,248", accent: "" },
-    {
-        label: "Active Critical Threats",
-        value: "42",
-        accent: "text-red-500 animate-pulse-glow",
-    },
-    { label: "Avg Response Time", value: "8.5 min", accent: "" },
-];
-
-const sourceDistribution = [
-    {
-        label: "Mesh Network (Verified)",
-        pct: 65,
-        gradient: "from-green-500 to-emerald-400",
-        badge: "text-green-400",
-    },
-    {
-        label: "Social NLP",
-        pct: 35,
-        gradient: "from-blue-500 to-cyan-400",
-        badge: "text-blue-400",
-    },
-];
-
-const urgencyBreakdown = [
-    {
-        label: "Critical",
-        pct: 20,
-        gradient: "from-red-600 to-red-400",
-        badge: "text-red-400",
-    },
-    {
-        label: "Rescue",
-        pct: 50,
-        gradient: "from-orange-500 to-amber-400",
-        badge: "text-orange-400",
-    },
-    {
-        label: "Info",
-        pct: 30,
-        gradient: "from-blue-500 to-sky-400",
-        badge: "text-blue-400",
-    },
-];
+import { useAlerts } from "@/context/AlertContext";
+import { useMemo } from "react";
 
 export default function AnalyticsPage() {
+    const { activeAlerts, resolvedAlerts } = useAlerts();
+
+    /* ── Derived data ── */
+    const allAlerts = useMemo(
+        () => [...activeAlerts, ...resolvedAlerts],
+        [activeAlerts, resolvedAlerts]
+    );
+
+    const totalProcessed = allAlerts.length;
+    const activeCritical = activeAlerts.filter(
+        (a) => a.urgency === "critical"
+    ).length;
+    const incidentsResolved = resolvedAlerts.length;
+
+    /* Source distribution */
+    const meshPct =
+        totalProcessed > 0
+            ? Math.round(
+                (allAlerts.filter((a) => a.source === "mesh").length /
+                    totalProcessed) *
+                100
+            )
+            : 0;
+    const socialPct = totalProcessed > 0 ? 100 - meshPct : 0;
+
+    const sourceDistribution = [
+        {
+            label: "Mesh Network (Verified)",
+            pct: meshPct,
+            gradient: "from-green-500 to-emerald-400",
+            badge: "text-green-400",
+        },
+        {
+            label: "Social NLP",
+            pct: socialPct,
+            gradient: "from-blue-500 to-cyan-400",
+            badge: "text-blue-400",
+        },
+    ];
+
+    /* Urgency breakdown (based on active alerts) */
+    const activeTotal = activeAlerts.length || 1; // avoid div-by-0
+    const criticalPct = Math.round(
+        (activeAlerts.filter((a) => a.urgency === "critical").length /
+            activeTotal) *
+        100
+    );
+    const rescuePct = Math.round(
+        (activeAlerts.filter((a) => a.urgency === "rescue").length /
+            activeTotal) *
+        100
+    );
+    const infoPct = 100 - criticalPct - rescuePct;
+
+    const urgencyBreakdown = [
+        {
+            label: "Critical",
+            pct: criticalPct,
+            gradient: "from-red-600 to-red-400",
+            badge: "text-red-400",
+        },
+        {
+            label: "Rescue",
+            pct: rescuePct,
+            gradient: "from-orange-500 to-amber-400",
+            badge: "text-orange-400",
+        },
+        {
+            label: "Info",
+            pct: infoPct,
+            gradient: "from-blue-500 to-sky-400",
+            badge: "text-blue-400",
+        },
+    ];
+
+    /* KPI cards */
+    const kpis = [
+        { label: "Total Alerts Processed", value: totalProcessed, accent: "" },
+        {
+            label: "Active Critical Threats",
+            value: activeCritical,
+            accent: activeCritical > 0 ? "text-red-500 animate-pulse-glow" : "",
+        },
+        {
+            label: "Incidents Resolved",
+            value: incidentsResolved,
+            accent: "text-green-400",
+        },
+    ];
+
     return (
         <div className="relative w-screen h-screen overflow-hidden theme-bg">
             {/* Nav */}
