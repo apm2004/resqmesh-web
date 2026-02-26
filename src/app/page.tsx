@@ -8,7 +8,7 @@ import GlassNav from "./components/GlassNav";
 import TriageFeed from "./components/TriageFeed";
 import NetworkHealth from "./components/NetworkHealth";
 import ActiveResponse from "./components/ActiveResponse";
-import DisasterAnalytics from "./components/DisasterAnalytics";
+
 
 const MapView = dynamic(() => import("./components/MapView"), { ssr: false });
 
@@ -56,10 +56,7 @@ export default function HUDDashboard() {
         />
       </div>
 
-      {/* ── Bottom Left: Disaster Analytics ── */}
-      <div className="absolute bottom-4 left-[368px] w-[340px] z-20">
-        <DisasterAnalytics />
-      </div>
+
     </div>
   );
 }
