@@ -20,7 +20,7 @@ const urgencyBorderClass: Record<LiveAlert["urgency"], string> = {
 const filterConfig: Record<FilterType, { label: string; active: string }> = {
     all: {
         label: "All",
-        active: "bg-white/20 border-white/40 text-white shadow-[0_0_12px_rgba(255,255,255,0.25)]",
+        active: "bg-slate-200 dark:bg-white/20 border-slate-400 dark:border-white/40 text-slate-900 dark:text-white shadow-[0_0_12px_rgba(0,0,0,0.1)] dark:shadow-[0_0_12px_rgba(255,255,255,0.25)]",
     },
     mesh: {
         label: "Mesh Only",
@@ -35,7 +35,7 @@ const filterConfig: Record<FilterType, { label: string; active: string }> = {
 const baseButtonClass =
     "px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-md transition-all duration-200 cursor-pointer";
 const inactiveButtonClass =
-    "bg-black/40 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/70";
+    "bg-slate-100 dark:bg-black/40 border-slate-300 dark:border-white/10 text-slate-500 dark:text-white/50 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white/70";
 
 export default function TriageFeed({
     alerts,
@@ -74,8 +74,8 @@ export default function TriageFeed({
                             key={key}
                             onClick={() => setActiveFilter(key)}
                             className={`${baseButtonClass} ${activeFilter === key
-                                    ? filterConfig[key].active
-                                    : inactiveButtonClass
+                                ? filterConfig[key].active
+                                : inactiveButtonClass
                                 }`}
                         >
                             {filterConfig[key].label}
@@ -105,8 +105,8 @@ export default function TriageFeed({
                                     key={alert.id}
                                     onClick={() => onSelectAlert(alert)}
                                     className={`${urgencyBorderClass[alert.urgency]} rounded-xl p-3 cursor-pointer transition-all duration-200 animate-slide-in ${isSelected
-                                            ? "theme-surface-active ring-1 ring-[var(--divider-strong)]"
-                                            : "theme-surface theme-surface-hover"
+                                        ? "theme-surface-active ring-1 ring-[var(--divider-strong)]"
+                                        : "theme-surface theme-surface-hover"
                                         }`}
                                     style={{ animationDelay: `${i * 60}ms` }}
                                 >
@@ -125,10 +125,10 @@ export default function TriageFeed({
                                         )}
                                         <span
                                             className={`text-[9px] font-bold uppercase tracking-wider ${alert.urgency === "critical"
-                                                    ? "text-red-400"
-                                                    : alert.urgency === "rescue"
-                                                        ? "text-orange-400"
-                                                        : "text-blue-400"
+                                                ? "text-red-400"
+                                                : alert.urgency === "rescue"
+                                                    ? "text-orange-400"
+                                                    : "text-blue-400"
                                                 }`}
                                         >
                                             {alert.urgency}

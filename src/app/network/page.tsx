@@ -33,9 +33,9 @@ export default function NetworkPage() {
                     {/* ── Row 1: Mesh + LoRa ── */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Mesh Network Health */}
-                        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5">
+                        <div className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5">
                             <div className="flex items-center justify-between mb-5">
-                                <h3 className="text-[11px] font-bold uppercase tracking-wider text-white/50">
+                                <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50">
                                     Mesh Network Health
                                 </h3>
                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/15 border border-green-500/30 shadow-[0_0_12px_rgba(34,197,94,0.3)]">
@@ -47,16 +47,16 @@ export default function NetworkPage() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5">
-                                    <p className="text-white/40 text-[10px] uppercase tracking-wider font-semibold mb-1">
+                                <div className="bg-slate-100 dark:bg-white/[0.03] rounded-xl p-4 border border-slate-200 dark:border-white/5">
+                                    <p className="text-slate-400 dark:text-white/40 text-[10px] uppercase tracking-wider font-semibold mb-1">
                                         Active Mobile Nodes
                                     </p>
                                     <p className="text-3xl font-bold text-green-400">
                                         847
                                     </p>
                                 </div>
-                                <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5">
-                                    <p className="text-white/40 text-[10px] uppercase tracking-wider font-semibold mb-1">
+                                <div className="bg-slate-100 dark:bg-white/[0.03] rounded-xl p-4 border border-slate-200 dark:border-white/5">
+                                    <p className="text-slate-400 dark:text-white/40 text-[10px] uppercase tracking-wider font-semibold mb-1">
                                         Offline Syncs Queued
                                     </p>
                                     <p className="text-3xl font-bold text-amber-400">
@@ -67,7 +67,7 @@ export default function NetworkPage() {
 
                             {/* Node Activity Sparkline */}
                             <div className="mt-4">
-                                <p className="text-[10px] text-white/30 mb-2">
+                                <p className="text-[10px] text-slate-400 dark:text-white/30 mb-2">
                                     Node activity (last 60 min)
                                 </p>
                                 <div className="flex items-end gap-[2px] h-10">
@@ -85,15 +85,15 @@ export default function NetworkPage() {
                         </div>
 
                         {/* LoRa Backbone */}
-                        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5">
-                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-5">
+                        <div className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5">
+                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 mb-5">
                                 LoRa Backbone — ESP32
                             </h3>
 
                             <div className="space-y-4">
                                 {/* Gateway Status */}
-                                <div className="flex items-center justify-between bg-white/[0.03] rounded-xl px-4 py-3 border border-white/5">
-                                    <span className="text-xs text-white/60">
+                                <div className="flex items-center justify-between bg-slate-100 dark:bg-white/[0.03] rounded-xl px-4 py-3 border border-slate-200 dark:border-white/5">
+                                    <span className="text-xs text-slate-500 dark:text-white/60">
                                         Gateway Status
                                     </span>
                                     <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400">
@@ -103,16 +103,16 @@ export default function NetworkPage() {
                                 </div>
 
                                 {/* Signal Strength */}
-                                <div className="bg-white/[0.03] rounded-xl px-4 py-3 border border-white/5">
+                                <div className="bg-slate-100 dark:bg-white/[0.03] rounded-xl px-4 py-3 border border-slate-200 dark:border-white/5">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs text-white/60">
+                                        <span className="text-xs text-slate-500 dark:text-white/60">
                                             Avg Signal Strength
                                         </span>
                                         <span className="text-xs font-bold text-amber-400">
                                             82%
                                         </span>
                                     </div>
-                                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-2 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
                                         <div
                                             className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-400 progress-glow transition-all duration-1000"
                                             style={{ width: "82%" }}
@@ -121,8 +121,8 @@ export default function NetworkPage() {
                                 </div>
 
                                 {/* Packets Relayed */}
-                                <div className="flex items-center justify-between bg-white/[0.03] rounded-xl px-4 py-3 border border-white/5">
-                                    <span className="text-xs text-white/60">
+                                <div className="flex items-center justify-between bg-slate-100 dark:bg-white/[0.03] rounded-xl px-4 py-3 border border-slate-200 dark:border-white/5">
+                                    <span className="text-xs text-slate-500 dark:text-white/60">
                                         Packets Relayed
                                     </span>
                                     <span className="text-lg font-bold text-amber-400">
@@ -134,8 +134,8 @@ export default function NetworkPage() {
                     </div>
 
                     {/* ── Row 2: API & Services ── */}
-                    <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5">
-                        <h3 className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-4">
+                    <div className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5">
+                        <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 mb-4">
                             API &amp; Services
                         </h3>
 
@@ -143,13 +143,13 @@ export default function NetworkPage() {
                             {services.map((svc) => (
                                 <div
                                     key={svc.name}
-                                    className="flex items-center justify-between bg-white/[0.03] rounded-xl px-4 py-3 border border-white/5"
+                                    className="flex items-center justify-between bg-slate-100 dark:bg-white/[0.03] rounded-xl px-4 py-3 border border-slate-200 dark:border-white/5"
                                 >
                                     <div className="flex items-center gap-3">
                                         <span
                                             className={`w-2.5 h-2.5 rounded-full ${svc.color} shadow-[0_0_10px_rgba(34,197,94,0.4)] animate-pulse-glow`}
                                         />
-                                        <span className="text-sm text-white font-medium">
+                                        <span className="text-sm text-slate-900 dark:text-white font-medium">
                                             {svc.name}
                                         </span>
                                     </div>
@@ -163,7 +163,7 @@ export default function NetworkPage() {
                         {/* Uptime bar */}
                         <div className="mt-5">
                             <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-[10px] text-white/40 uppercase tracking-wider font-semibold">
+                                <span className="text-[10px] text-slate-400 dark:text-white/40 uppercase tracking-wider font-semibold">
                                     System Uptime
                                 </span>
                                 <span className="text-xs font-bold text-green-400">
@@ -175,13 +175,13 @@ export default function NetworkPage() {
                                     <div
                                         key={i}
                                         className={`h-5 flex-1 rounded-sm transition-all ${i === 17
-                                                ? "bg-amber-500/70"
-                                                : "bg-green-500/50"
+                                            ? "bg-amber-500/70"
+                                            : "bg-green-500/50"
                                             }`}
                                     />
                                 ))}
                             </div>
-                            <div className="flex justify-between mt-1 text-[9px] text-white/20">
+                            <div className="flex justify-between mt-1 text-[9px] text-slate-400 dark:text-white/20">
                                 <span>30 days ago</span>
                                 <span>Today</span>
                             </div>

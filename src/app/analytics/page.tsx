@@ -67,13 +67,13 @@ export default function AnalyticsPage() {
                         {kpis.map((kpi) => (
                             <div
                                 key={kpi.label}
-                                className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5 text-center"
+                                className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5 text-center"
                             >
-                                <p className="text-white/50 text-[11px] uppercase tracking-wider font-semibold mb-2">
+                                <p className="text-slate-500 dark:text-white/50 text-[11px] uppercase tracking-wider font-semibold mb-2">
                                     {kpi.label}
                                 </p>
                                 <p
-                                    className={`text-3xl font-bold ${kpi.accent || "text-white"}`}
+                                    className={`text-3xl font-bold ${kpi.accent || "text-slate-900 dark:text-white"}`}
                                 >
                                     {kpi.value}
                                 </p>
@@ -84,15 +84,15 @@ export default function AnalyticsPage() {
                     {/* ── Middle Row ── */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Source Distribution */}
-                        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5">
-                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-4">
+                        <div className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5">
+                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 mb-4">
                                 Source Distribution
                             </h3>
                             <div className="space-y-4">
                                 {sourceDistribution.map((s) => (
                                     <div key={s.label}>
                                         <div className="flex items-center justify-between mb-1.5">
-                                            <span className="text-xs text-white/80">
+                                            <span className="text-xs text-slate-600 dark:text-white/80">
                                                 {s.label}
                                             </span>
                                             <span
@@ -101,7 +101,7 @@ export default function AnalyticsPage() {
                                                 {s.pct}%
                                             </span>
                                         </div>
-                                        <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-2.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full bg-gradient-to-r ${s.gradient} transition-all duration-1000 ease-out progress-glow`}
                                                 style={{
@@ -115,15 +115,15 @@ export default function AnalyticsPage() {
                         </div>
 
                         {/* Urgency Breakdown */}
-                        <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5">
-                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-4">
+                        <div className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5">
+                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 mb-4">
                                 Urgency Breakdown
                             </h3>
                             <div className="space-y-4">
                                 {urgencyBreakdown.map((u) => (
                                     <div key={u.label}>
                                         <div className="flex items-center justify-between mb-1.5">
-                                            <span className="text-xs text-white/80">
+                                            <span className="text-xs text-slate-600 dark:text-white/80">
                                                 {u.label}
                                             </span>
                                             <span
@@ -132,7 +132,7 @@ export default function AnalyticsPage() {
                                                 {u.pct}%
                                             </span>
                                         </div>
-                                        <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-2.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full bg-gradient-to-r ${u.gradient} transition-all duration-1000 ease-out progress-glow`}
                                                 style={{
@@ -147,8 +147,8 @@ export default function AnalyticsPage() {
                     </div>
 
                     {/* ── Bottom Summary ── */}
-                    <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5">
-                        <h3 className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-4">
+                    <div className="bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5">
+                        <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-white/50 mb-4">
                             Incident Timeline (Last 24h)
                         </h3>
                         <div className="flex items-end gap-1 h-24">
@@ -165,7 +165,7 @@ export default function AnalyticsPage() {
                                 )
                             )}
                         </div>
-                        <div className="flex justify-between mt-2 text-[10px] text-white/30">
+                        <div className="flex justify-between mt-2 text-[10px] text-slate-400 dark:text-white/30">
                             <span>00:00</span>
                             <span>06:00</span>
                             <span>12:00</span>

@@ -1,6 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+/* ── Tell TW4 that dark: should match data-theme="dark" ── */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* ── Dark HUD Variables (default) ── */
 :root {
   --background: #0a0e1a;
