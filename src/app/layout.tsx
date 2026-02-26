@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "./components/ThemeContext";
+import Providers from "./components/Providers";
 
 export const metadata: Metadata = {
   title: "ResQMesh — Command Center",
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

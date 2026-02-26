@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { liveAlerts, type LiveAlert } from "@/lib/mockData";
+import { type LiveAlert } from "@/lib/mockData";
+import { useAlerts } from "@/context/AlertContext";
 import GlassNav from "./components/GlassNav";
 import TriageFeed from "./components/TriageFeed";
 import NetworkHealth from "./components/NetworkHealth";
@@ -12,6 +13,7 @@ import DisasterAnalytics from "./components/DisasterAnalytics";
 const MapView = dynamic(() => import("./components/MapView"), { ssr: false });
 
 export default function HUDDashboard() {
+  const { activeAlerts } = useAlerts();
   const [selectedAlert, setSelectedAlert] = useState<LiveAlert | null>(null);
 
   return (
@@ -19,7 +21,7 @@ export default function HUDDashboard() {
       {/* ═══ Layer 0: Full-bleed dark map ═══ */}
       <div className="absolute inset-0 z-0">
         <MapView
-          alerts={liveAlerts}
+          alerts={activeAlerts}
           selectedAlert={selectedAlert}
           onSelectAlert={setSelectedAlert}
         />
@@ -35,7 +37,7 @@ export default function HUDDashboard() {
       {/* ── Left Side: Triage Feed ── */}
       <div className="absolute top-20 left-4 bottom-4 w-[340px] z-20">
         <TriageFeed
-          alerts={liveAlerts}
+          alerts={activeAlerts}
           selectedAlert={selectedAlert}
           onSelectAlert={setSelectedAlert}
         />
@@ -48,7 +50,10 @@ export default function HUDDashboard() {
 
       {/* ── Bottom Right: Active Response ── */}
       <div className="absolute bottom-4 right-4 w-[320px] z-20">
-        <ActiveResponse selectedAlert={selectedAlert} />
+        <ActiveResponse
+          selectedAlert={selectedAlert}
+          onClearSelection={() => setSelectedAlert(null)}
+        />
       </div>
 
       {/* ── Bottom Left: Disaster Analytics ── */}

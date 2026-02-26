@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { LiveAlert } from "@/lib/mockData";
+import { useAlerts } from "@/context/AlertContext";
 
 interface ActiveResponseProps {
     selectedAlert: LiveAlert | null;
+    onClearSelection: () => void;
 }
 
 /* ── Animated waveform bars ── */
@@ -70,7 +72,8 @@ const badgeStyle: Record<string, string> = {
 };
 const defaultBadge = "bg-red-500/20 text-red-500 border border-red-500/30";
 
-export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
+export default function ActiveResponse({ selectedAlert, onClearSelection }: ActiveResponseProps) {
+    const { markAsResolved } = useAlerts();
     const [showComms, setShowComms] = useState(false);
     const [activeToast, setActiveToast] = useState<ToastType>(null);
     const [toastVisible, setToastVisible] = useState(false);
@@ -102,7 +105,13 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
     };
 
     const handleResolved = () => {
+        if (!selectedAlert) return;
         fireToast("resolved");
+        // Give the toast a moment to show, then resolve and close panel
+        setTimeout(() => {
+            markAsResolved(selectedAlert.id);
+            onClearSelection();
+        }, 800);
     };
 
     /* ── render nothing when no alert is selected ── */
