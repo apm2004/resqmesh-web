@@ -23,12 +23,16 @@ interface AlertContextValue {
     activeAlerts: LiveAlert[];
     resolvedAlerts: ResolvedAlert[];
     markAsResolved: (alertId: string) => void;
+    acknowledgeAlert: (alertId: string) => void;
+    isAcknowledged: (alertId: string) => boolean;
 }
 
 const AlertContext = createContext<AlertContextValue>({
     activeAlerts: [],
     resolvedAlerts: [],
     markAsResolved: () => { },
+    acknowledgeAlert: () => { },
+    isAcknowledged: () => false,
 });
 
 /* ── Simulation config ── */
@@ -41,6 +45,15 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     );
     const [resolvedAlerts, setResolvedAlerts] = useState<ResolvedAlert[]>([]);
     const pendingAlerts = useRef<LiveAlert[]>(liveAlerts.slice(INITIAL_COUNT));
+    const acknowledgedIds = useRef<Set<string>>(new Set());
+
+    const acknowledgeAlert = useCallback((alertId: string) => {
+        acknowledgedIds.current.add(alertId);
+    }, []);
+
+    const isAcknowledged = useCallback((alertId: string) => {
+        return acknowledgedIds.current.has(alertId);
+    }, []);
 
     /* ── Simulation interval: drip-feed pending alerts ── */
     useEffect(() => {
@@ -104,7 +117,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
 
     return (
         <AlertContext.Provider
-            value={{ activeAlerts, resolvedAlerts, markAsResolved }}
+            value={{ activeAlerts, resolvedAlerts, markAsResolved, acknowledgeAlert, isAcknowledged }}
         >
             {children}
         </AlertContext.Provider>

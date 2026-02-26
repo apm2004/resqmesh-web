@@ -73,14 +73,12 @@ const badgeStyle: Record<string, string> = {
 const defaultBadge = "bg-red-500/20 text-red-500 border border-red-500/30";
 
 export default function ActiveResponse({ selectedAlert, onClearSelection }: ActiveResponseProps) {
-    const { markAsResolved } = useAlerts();
-    const [showComms, setShowComms] = useState(false);
+    const { markAsResolved, acknowledgeAlert, isAcknowledged } = useAlerts();
     const [activeToast, setActiveToast] = useState<ToastType>(null);
     const [toastVisible, setToastVisible] = useState(false);
 
-    /* Reset state when a different alert is selected */
+    /* Reset toast state when a different alert is selected */
     useEffect(() => {
-        setShowComms(false);
         setActiveToast(null);
         setToastVisible(false);
     }, [selectedAlert?.id]);
@@ -96,7 +94,8 @@ export default function ActiveResponse({ selectedAlert, onClearSelection }: Acti
     }, []);
 
     const handleAcknowledge = () => {
-        setShowComms(true);
+        if (!selectedAlert) return;
+        acknowledgeAlert(selectedAlert.id);
         fireToast("acknowledge");
     };
 
@@ -183,7 +182,7 @@ export default function ActiveResponse({ selectedAlert, onClearSelection }: Acti
             </div>
 
             {/* ── Radio comms strips (appear on Acknowledge) ── */}
-            {showComms && (
+            {isAcknowledged(selectedAlert.id) && (
                 <div className="space-y-2 animate-fade-in-up" style={{ animationDuration: "0.4s" }}>
                     <div className="flex items-center gap-3 bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2">
                         <Waveform />
@@ -218,12 +217,12 @@ export default function ActiveResponse({ selectedAlert, onClearSelection }: Acti
                 {/* Acknowledge */}
                 <button
                     onClick={handleAcknowledge}
-                    className={`py-2 rounded-xl font-bold text-sm transition cursor-pointer ${showComms
+                    className={`py-2 rounded-xl font-bold text-sm transition cursor-pointer ${isAcknowledged(selectedAlert.id)
                         ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
                         : "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:brightness-110"
                         }`}
                 >
-                    {showComms ? "✓ Acknowledged" : "Acknowledge"}
+                    {isAcknowledged(selectedAlert.id) ? "✓ Acknowledged" : "Acknowledge"}
                 </button>
 
                 {/* Escalate */}
