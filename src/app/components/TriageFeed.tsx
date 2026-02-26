@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { LiveAlert } from "@/lib/mockData";
 
 interface TriageFeedProps {
@@ -86,29 +87,35 @@ export default function TriageFeed({
 
             {/* Alert Cards */}
             <div className="flex-1 overflow-y-auto hud-scroll px-3 py-3">
-                <div
-                    key={activeFilter}
-                    className="space-y-2.5 animate-fade-in-up"
-                    style={{ animationDuration: "0.5s" }}
-                >
+                <AnimatePresence mode="popLayout">
                     {filteredAlerts.length === 0 ? (
-                        <div className="flex items-center justify-center h-32">
+                        <motion.div
+                            key="empty"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex items-center justify-center h-32"
+                        >
                             <p className="theme-dimmer text-xs text-center">
                                 No active alerts in this category
                             </p>
-                        </div>
+                        </motion.div>
                     ) : (
-                        filteredAlerts.map((alert, i) => {
+                        filteredAlerts.map((alert) => {
                             const isSelected = selectedAlert?.id === alert.id;
                             return (
-                                <div
+                                <motion.div
                                     key={alert.id}
+                                    layout="position"
+                                    initial={{ opacity: 0, y: -50, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                     onClick={() => onSelectAlert(alert)}
-                                    className={`${urgencyBorderClass[alert.urgency]} rounded-xl p-3 cursor-pointer transition-all duration-200 animate-slide-in ${isSelected
+                                    className={`${urgencyBorderClass[alert.urgency]} rounded-xl p-3 cursor-pointer transition-colors duration-200 mb-2.5 ${isSelected
                                         ? "theme-surface-active ring-1 ring-[var(--divider-strong)]"
                                         : "theme-surface theme-surface-hover"
                                         }`}
-                                    style={{ animationDelay: `${i * 60}ms` }}
                                 >
                                     {/* Source badge + urgency */}
                                     <div className="flex items-center justify-between mb-1.5">
@@ -147,11 +154,11 @@ export default function TriageFeed({
                                             {alert.location}
                                         </span>
                                     </div>
-                                </div>
+                                </motion.div>
                             );
                         })
                     )}
-                </div>
+                </AnimatePresence>
             </div>
         </div>
     );
