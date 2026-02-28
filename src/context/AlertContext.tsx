@@ -10,7 +10,7 @@ import {
     type ReactNode,
 } from "react";
 import toast from "react-hot-toast";
-import { liveAlerts, type LiveAlert } from "@/lib/mockData";
+import { liveAlerts, generateMockAlerts, type LiveAlert } from "@/lib/mockData";
 
 /* ── Resolved alert extends LiveAlert with a resolution timestamp ── */
 export interface ResolvedAlert extends LiveAlert {
@@ -46,6 +46,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     const [resolvedAlerts, setResolvedAlerts] = useState<ResolvedAlert[]>([]);
     const pendingAlerts = useRef<LiveAlert[]>(liveAlerts.slice(INITIAL_COUNT));
     const acknowledgedIds = useRef<Set<string>>(new Set());
+    const hasHydrated = useRef(false);
 
     const acknowledgeAlert = useCallback((alertId: string) => {
         acknowledgedIds.current.add(alertId);
@@ -53,6 +54,16 @@ export function AlertProvider({ children }: { children: ReactNode }) {
 
     const isAcknowledged = useCallback((alertId: string) => {
         return acknowledgedIds.current.has(alertId);
+    }, []);
+
+    /* ── Hydrate mock analytics data only on client ── */
+    useEffect(() => {
+        if (hasHydrated.current) return;
+        hasHydrated.current = true;
+
+        const generatedData = generateMockAlerts(40);
+        setActiveAlerts(prev => [...prev, ...generatedData.active]);
+        setResolvedAlerts(prev => [...prev, ...generatedData.resolved]);
     }, []);
 
     /* ── Simulation interval: drip-feed pending alerts ── */
@@ -67,7 +78,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
             setActiveAlerts((prev) => {
                 // Duplicate guard (strict mode)
                 if (prev.some((a) => a.id === next.id)) return prev;
-                return [next, ...prev];
+                return [{ ...next, createdAt: Date.now() }, ...prev];
             });
 
             // Fire HUD-style incoming alert toast
