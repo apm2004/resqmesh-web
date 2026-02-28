@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import MapSearchBar from "./MapSearchBar";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LiveAlert } from "@/lib/mockData";
@@ -65,6 +66,7 @@ interface MapViewProps {
     selectedAlert: LiveAlert | null;
     onSelectAlert: (alert: LiveAlert) => void;
     className?: string;
+    showSearchBar?: boolean;
 }
 
 export default function MapView({
@@ -72,6 +74,7 @@ export default function MapView({
     selectedAlert,
     onSelectAlert,
     className = "",
+    showSearchBar = false,
 }: MapViewProps) {
     const center: [number, number] = [34.055, -118.255];
     const { theme } = useTheme();
@@ -89,6 +92,7 @@ export default function MapView({
                 url={tileUrls[theme]}
             />
             <FlyTo alert={selectedAlert} />
+            {showSearchBar && <MapSearchBar />}
 
             {alerts.map((alert) => {
                 const isSelected = selectedAlert?.id === alert.id;

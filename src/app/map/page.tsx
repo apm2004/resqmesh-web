@@ -21,6 +21,7 @@ export default function MapPage() {
                     alerts={activeAlerts}
                     selectedAlert={selectedAlert}
                     onSelectAlert={setSelectedAlert}
+                    showSearchBar
                 />
             </div>
 
