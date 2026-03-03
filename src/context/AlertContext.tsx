@@ -11,6 +11,7 @@ import {
 } from "react";
 import toast from "react-hot-toast";
 import { liveAlerts, type LiveAlert } from "@/lib/mockData";
+import { fetchRedditAlerts, POLL_INTERVAL_MS } from "@/lib/redditPoller";
 
 /* ── Resolved alert extends LiveAlert with a resolution timestamp ── */
 export interface ResolvedAlert extends LiveAlert {
@@ -36,8 +37,8 @@ const AlertContext = createContext<AlertContextValue>({
 });
 
 /* ── Simulation config ── */
-const INITIAL_COUNT = 5; // start with first 5 alerts
-const INTERVAL_MS = 12_000; // new alert every 12 seconds
+const INITIAL_COUNT = 4; // show all 4 mesh alerts immediately
+const INTERVAL_MS = 12_000; // new alert every 12 seconds (no pending alerts now)
 
 export function AlertProvider({ children }: { children: ReactNode }) {
     const [activeAlerts, setActiveAlerts] = useState<LiveAlert[]>(
@@ -90,6 +91,55 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         }, INTERVAL_MS);
 
         return () => clearInterval(interval);
+    }, []);
+
+    /* ── Reddit poller: fetch r/ResQMeshAlerts every 60 seconds ── */
+    useEffect(() => {
+        const seenRedditIds = new Set<string>();
+
+        async function poll() {
+            const redditAlerts = await fetchRedditAlerts();
+            if (redditAlerts.length === 0) return;
+
+            const newAlerts = redditAlerts.filter(a => !seenRedditIds.has(a.id));
+            if (newAlerts.length === 0) return;
+
+            newAlerts.forEach(a => seenRedditIds.add(a.id));
+
+            setActiveAlerts(prev => {
+                // Deduplicate against existing alerts
+                const incoming = newAlerts.filter(
+                    a => !prev.some(p => p.id === a.id)
+                );
+                if (incoming.length === 0) return prev;
+                return [...incoming, ...prev];
+            });
+
+            // Toast for each new Reddit alert
+            newAlerts.forEach(alert => {
+                toast.custom(
+                    (t) => (
+                        <div
+                            className={`bg-blue-500/10 border border-blue-500/50 backdrop-blur-md text-white
+                                px-6 py-3 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)]
+                                flex items-center gap-3 transition-all duration-300
+                                ${t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
+                        >
+                            <span className="text-lg">🐦</span>
+                            <span className="text-sm font-semibold tracking-wide">
+                                Reddit Alert: {alert.title}
+                            </span>
+                        </div>
+                    ),
+                    { position: "bottom-center", duration: 6000 }
+                );
+            });
+        }
+
+        // Run immediately, then every POLL_INTERVAL_MS
+        poll();
+        const redditInterval = setInterval(poll, POLL_INTERVAL_MS);
+        return () => clearInterval(redditInterval);
     }, []);
 
     const markAsResolved = useCallback((alertId: string) => {

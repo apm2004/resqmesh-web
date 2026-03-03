@@ -38,10 +38,10 @@ export default function AnalyticsPage() {
             badge: "text-green-400",
         },
         {
-            label: "Social NLP",
+            label: "Social Media",
             pct: socialPct,
-            gradient: "from-blue-500 to-cyan-400",
-            badge: "text-blue-400",
+            gradient: "from-orange-500 to-amber-400",
+            badge: "text-orange-400",
         },
     ];
 

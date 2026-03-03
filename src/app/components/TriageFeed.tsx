@@ -28,8 +28,8 @@ const filterConfig: Record<FilterType, { label: string; active: string }> = {
         active: "bg-green-500/20 border-green-500/40 text-green-400 shadow-[0_0_12px_rgba(34,197,94,0.35)]",
     },
     social: {
-        label: "Social NLP",
-        active: "bg-blue-500/20 border-blue-500/40 text-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.35)]",
+        label: "Social Media",
+        active: "bg-orange-500/20 border-orange-500/40 text-orange-400 shadow-[0_0_12px_rgba(249,115,22,0.35)]",
     },
 };
 
@@ -125,9 +125,9 @@ export default function TriageFeed({
                                                 📱 Mesh (Verified)
                                             </span>
                                         ) : (
-                                            <span className="text-[10px] font-semibold text-blue-400 flex items-center gap-1">
-                                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 glow-blue" />
-                                                🐦 Social (NLP)
+                                            <span className="text-[10px] font-semibold text-orange-400 flex items-center gap-1">
+                                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-400 glow-orange" />
+                                                📲 Social Media
                                             </span>
                                         )}
                                         <span
