@@ -72,8 +72,8 @@ export default function NetworkHealth() {
                                     <div
                                         key={i}
                                         className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < Math.round(pct / 5)
-                                                ? `${s.barColor} opacity-90`
-                                                : "theme-bar-track"
+                                            ? `${s.barColor} opacity-90`
+                                            : "theme-bar-track"
                                             }`}
                                     />
                                 ))}

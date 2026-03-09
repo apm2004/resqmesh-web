@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { liveAlerts, type LiveAlert } from "@/lib/mockData";
+import { type LiveAlert } from "@/lib/mockData";
+import { useAlerts } from "@/context/AlertContext";
 import GlassNav from "../components/GlassNav";
 import TriageFeed from "../components/TriageFeed";
 
 const MapView = dynamic(() => import("../components/MapView"), { ssr: false });
 
 export default function MapPage() {
+    const { activeAlerts } = useAlerts();
     const [selectedAlert, setSelectedAlert] = useState<LiveAlert | null>(null);
 
     return (
@@ -16,9 +18,10 @@ export default function MapPage() {
             {/* Full-bleed map */}
             <div className="absolute inset-0 z-0">
                 <MapView
-                    alerts={liveAlerts}
+                    alerts={activeAlerts}
                     selectedAlert={selectedAlert}
                     onSelectAlert={setSelectedAlert}
+                    showSearchBar
                 />
             </div>
 
@@ -30,7 +33,7 @@ export default function MapPage() {
             {/* Left sidebar */}
             <div className="absolute top-20 left-4 bottom-4 w-[340px] z-20">
                 <TriageFeed
-                    alerts={liveAlerts}
+                    alerts={activeAlerts}
                     selectedAlert={selectedAlert}
                     onSelectAlert={setSelectedAlert}
                 />

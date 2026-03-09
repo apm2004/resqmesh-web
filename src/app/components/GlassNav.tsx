@@ -80,7 +80,7 @@ export default function GlassNav() {
                             href={href}
                             className={`relative px-4 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 ${isActive
                                 ? "text-white font-bold"
-                                : "text-white/50 hover:text-white/80 hover:bg-[var(--surface-hover)]"
+                                : "text-slate-500 dark:text-white/50 hover:text-slate-800 dark:hover:text-white/80 hover:bg-[var(--surface-hover)]"
                                 }`}
                         >
                             {isActive && (
@@ -100,7 +100,7 @@ export default function GlassNav() {
                 })}
 
                 {/* Divider */}
-                <div className="w-px h-6 bg-white/10 ml-1" />
+                <div className="w-px h-6 bg-slate-300 dark:bg-white/10 ml-1" />
 
                 {/* Settings / More Options button */}
                 <button
@@ -124,7 +124,7 @@ export default function GlassNav() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute right-0 mt-4 w-48 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl p-2 shadow-2xl z-50"
+                        className="absolute right-0 mt-4 w-48 bg-white/80 dark:bg-black/60 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-xl p-2 shadow-2xl z-50"
                     >
                         {/* Show advanced links only in Operational mode */}
                         {!isAdvancedMode && (
@@ -137,7 +137,7 @@ export default function GlassNav() {
                                             onClick={() =>
                                                 setIsDropdownOpen(false)
                                             }
-                                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-600 dark:text-white/70 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors"
                                         >
                                             <Icon className="h-3.5 w-3.5" />
                                             {label}
@@ -146,7 +146,7 @@ export default function GlassNav() {
                                 )}
 
                                 {/* Divider */}
-                                <div className="border-t border-white/10 my-1" />
+                                <div className="border-t border-slate-300 dark:border-white/10 my-1" />
                             </>
                         )}
 
@@ -158,7 +158,7 @@ export default function GlassNav() {
                                 ) : (
                                     <Sun className="h-3.5 w-3.5 text-amber-500" />
                                 )}
-                                <span className="text-sm text-white/70">
+                                <span className="text-sm text-slate-600 dark:text-white/70">
                                     {theme === "dark" ? "Dark" : "Light"}
                                 </span>
                             </div>

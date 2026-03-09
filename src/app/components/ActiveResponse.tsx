@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { LiveAlert } from "@/lib/mockData";
+import { useAlerts } from "@/context/AlertContext";
 
 interface ActiveResponseProps {
     selectedAlert: LiveAlert | null;
+    onClearSelection: () => void;
 }
 
 /* ── Animated waveform bars ── */
@@ -70,14 +72,13 @@ const badgeStyle: Record<string, string> = {
 };
 const defaultBadge = "bg-red-500/20 text-red-500 border border-red-500/30";
 
-export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
-    const [showComms, setShowComms] = useState(false);
+export default function ActiveResponse({ selectedAlert, onClearSelection }: ActiveResponseProps) {
+    const { markAsResolved, acknowledgeAlert, isAcknowledged } = useAlerts();
     const [activeToast, setActiveToast] = useState<ToastType>(null);
     const [toastVisible, setToastVisible] = useState(false);
 
-    /* Reset state when a different alert is selected */
+    /* Reset toast state when a different alert is selected */
     useEffect(() => {
-        setShowComms(false);
         setActiveToast(null);
         setToastVisible(false);
     }, [selectedAlert?.id]);
@@ -93,7 +94,8 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
     }, []);
 
     const handleAcknowledge = () => {
-        setShowComms(true);
+        if (!selectedAlert) return;
+        acknowledgeAlert(selectedAlert.id);
         fireToast("acknowledge");
     };
 
@@ -102,31 +104,29 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
     };
 
     const handleResolved = () => {
+        if (!selectedAlert) return;
         fireToast("resolved");
+        // Give the toast a moment to show, then resolve and close panel
+        setTimeout(() => {
+            markAsResolved(selectedAlert.id);
+            onClearSelection();
+        }, 800);
     };
 
-    /* ── empty state ── */
-    if (!selectedAlert) {
-        return (
-            <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5 flex items-center justify-center min-h-[220px]">
-                <p className="text-white/40 text-sm">
-                    Select an alert for full details
-                </p>
-            </div>
-        );
-    }
+    /* ── render nothing when no alert is selected ── */
+    if (!selectedAlert) return null;
 
     const badge = badgeStyle[selectedAlert.alertType] ?? defaultBadge;
     const toast = activeToast ? toastConfigs[activeToast] : null;
 
     return (
-        <div className="relative bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5 animate-fade-in-up space-y-4">
+        <div className="relative bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5 animate-fade-in-up space-y-4">
 
             {/* ── Toast popup ── */}
             {toast && (
                 <div
                     className={`absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full w-[90%]
-                        bg-black/70 backdrop-blur-xl border ${toast.border} rounded-xl px-4 py-3
+                        bg-white/80 dark:bg-black/70 backdrop-blur-xl border ${toast.border} rounded-xl px-4 py-3
                         ${toast.glow} transition-all duration-300 z-50
                         ${toastVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
                 >
@@ -136,7 +136,7 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
                             <p className={`text-sm font-bold ${toast.accent}`}>
                                 {toast.title}
                             </p>
-                            <p className="text-white/60 text-[11px] leading-relaxed mt-0.5">
+                            <p className="text-slate-500 dark:text-white/60 text-[11px] leading-relaxed mt-0.5">
                                 {toast.message}
                             </p>
                         </div>
@@ -145,7 +145,7 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
             )}
 
             {/* ── 1. Header label ── */}
-            <p className="text-[11px] uppercase tracking-widest text-white/50 font-semibold">
+            <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-white/50 font-semibold">
                 Active Response
             </p>
 
@@ -156,24 +156,24 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
                 >
                     {selectedAlert.alertType}
                 </span>
-                <span className="text-white/40 text-[11px]">
+                <span className="text-slate-400 dark:text-white/40 text-[11px]">
                     ID: {selectedAlert.userId}
                 </span>
             </div>
 
             {/* ── 3. Title & message ── */}
             <div>
-                <h2 className="text-white font-bold text-xl leading-tight">
+                <h2 className="text-slate-900 dark:text-white font-bold text-xl leading-tight">
                     {selectedAlert.alertType}
                 </h2>
-                <p className="text-white/80 text-sm mt-1 leading-relaxed">
+                <p className="text-slate-600 dark:text-white/80 text-sm mt-1 leading-relaxed">
                     {selectedAlert.message}
                 </p>
             </div>
 
             {/* ── 4. Coordinates box ── */}
-            <div className="bg-white/5 border border-white/10 p-3 rounded-lg">
-                <span className="text-[10px] uppercase tracking-wider text-white/50 font-semibold">
+            <div className="bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 p-3 rounded-lg">
+                <span className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-white/50 font-semibold">
                     Coordinates
                 </span>
                 <p className="text-orange-400 text-sm font-medium mt-0.5">
@@ -182,28 +182,28 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
             </div>
 
             {/* ── Radio comms strips (appear on Acknowledge) ── */}
-            {showComms && (
+            {isAcknowledged(selectedAlert.id) && (
                 <div className="space-y-2 animate-fade-in-up" style={{ animationDuration: "0.4s" }}>
-                    <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                    <div className="flex items-center gap-3 bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2">
                         <Waveform />
                         <div className="flex-1 min-w-0">
                             <p className="text-green-400 text-[10px] font-semibold">
                                 Rescue Team Alpha
                             </p>
-                            <p className="text-white/40 text-[10px] truncate">
+                            <p className="text-slate-400 dark:text-white/40 text-[10px] truncate">
                                 En Route — ETA 4 min
                             </p>
                         </div>
                         <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse-glow" />
                     </div>
 
-                    <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                    <div className="flex items-center gap-3 bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2">
                         <Waveform />
                         <div className="flex-1 min-w-0">
                             <p className="text-amber-400 text-[10px] font-semibold">
                                 Medical Unit Bravo
                             </p>
-                            <p className="text-white/40 text-[10px] truncate">
+                            <p className="text-slate-400 dark:text-white/40 text-[10px] truncate">
                                 On Scene — Sector 7
                             </p>
                         </div>
@@ -217,18 +217,18 @@ export default function ActiveResponse({ selectedAlert }: ActiveResponseProps) {
                 {/* Acknowledge */}
                 <button
                     onClick={handleAcknowledge}
-                    className={`py-2 rounded-xl font-bold text-sm transition cursor-pointer ${showComms
-                            ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                            : "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:brightness-110"
+                    className={`py-2 rounded-xl font-bold text-sm transition cursor-pointer ${isAcknowledged(selectedAlert.id)
+                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30"
+                        : "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:brightness-110"
                         }`}
                 >
-                    {showComms ? "✓ Acknowledged" : "Acknowledge"}
+                    {isAcknowledged(selectedAlert.id) ? "✓ Acknowledged" : "Acknowledge"}
                 </button>
 
                 {/* Escalate */}
                 <button
                     onClick={handleEscalate}
-                    className="py-2 rounded-xl bg-white/5 border border-white/10 text-white/70 font-medium text-sm hover:bg-white/10 transition cursor-pointer"
+                    className="py-2 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-600 dark:text-white/70 font-medium text-sm hover:bg-slate-200 dark:hover:bg-white/10 transition cursor-pointer"
                 >
                     Escalate
                 </button>
