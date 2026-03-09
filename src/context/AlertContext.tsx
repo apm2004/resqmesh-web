@@ -10,7 +10,9 @@ import {
     type ReactNode,
 } from "react";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 import { liveAlerts, generateMockAlerts, type LiveAlert } from "@/lib/mockData";
+import { transformMeshAlert, type RawMeshPayload } from "@/lib/transformMeshAlert";
 
 /* ── Resolved alert extends LiveAlert with a resolution timestamp ── */
 export interface ResolvedAlert extends LiveAlert {
@@ -64,6 +66,52 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         const generatedData = generateMockAlerts(40);
         setActiveAlerts(prev => [...prev, ...generatedData.active]);
         setResolvedAlerts(prev => [...prev, ...generatedData.resolved]);
+    }, []);
+
+    /* ── Live backend: Socket.IO connection ── */
+    useEffect(() => {
+        const socket = io(
+            process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:5000',
+            { transports: ['websocket', 'polling'] }
+        );
+
+        socket.on('connect', () => {
+            console.log('[Socket.IO] Connected to ResQMesh backend →', socket.id);
+        });
+
+        socket.on('new_mesh_alert', (rawPayload: RawMeshPayload) => {
+            const formatted = transformMeshAlert(rawPayload);
+
+            setActiveAlerts((prev) => {
+                // Duplicate guard — mesh re-broadcasts can deliver the same ID twice
+                if (prev.some((a) => a.id === formatted.id)) return prev;
+                return [formatted, ...prev];
+            });
+
+            // HUD-style toast matching the existing simulation style
+            toast.custom(
+                (t) => (
+                    <div
+                        className={`bg-red-500/10 border border-red-500/50 backdrop-blur-md text-white
+                            px-6 py-3 rounded-full shadow-[0_0_20px_rgba(239,68,68,0.4)]
+                            flex items-center gap-3 transition-all duration-300
+                            ${t.visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                    >
+                        <span className="text-lg">🚨</span>
+                        <span className="text-sm font-semibold tracking-wide">
+                            New Mesh Alert Detected: {formatted.title}
+                        </span>
+                    </div>
+                ),
+                { position: 'bottom-center', duration: 6000 }
+            );
+        });
+
+        return () => {
+            socket.off('new_mesh_alert');
+            socket.disconnect();
+            console.log('[Socket.IO] Disconnected from ResQMesh backend');
+        };
     }, []);
 
     /* ── Simulation interval: drip-feed pending alerts ── */
