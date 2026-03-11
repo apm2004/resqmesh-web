@@ -63,9 +63,10 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         if (hasHydrated.current) return;
         hasHydrated.current = true;
 
-        const generatedData = generateMockAlerts(40);
-        setActiveAlerts(prev => [...prev, ...generatedData.active]);
-        setResolvedAlerts(prev => [...prev, ...generatedData.resolved]);
+        // Production transition: seed exactly 5 pending alerts, no resolved mock data
+        const generatedAlerts = generateMockAlerts(5);
+        setActiveAlerts(generatedAlerts.active);
+        setResolvedAlerts([]);
     }, []);
 
     /* ── Live backend: Socket.IO connection ── */

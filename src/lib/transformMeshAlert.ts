@@ -1,4 +1,5 @@
 import type { LiveAlert } from './mockData';
+import type { AlertCategory } from './alertConfig';
 
 // ─── Raw Payload ─────────────────────────────────────────────────────────────
 // Exact shape emitted by the Node.js backend after saving to MongoDB.
@@ -14,18 +15,23 @@ export interface RawMeshPayload {
 }
 
 // ─── Urgency Mapping ─────────────────────────────────────────────────────────
-const URGENCY_MAP: Record<string, LiveAlert['urgency']> = {
-    medical: 'critical',
-    fire: 'critical',
-    hazmat: 'critical',
-    rescue: 'rescue',
-    flood: 'rescue',
-    collapse: 'rescue',
-    info: 'info',
+// Maps raw Kotlin/backend type strings to the 6 AlertCategory enums.
+const URGENCY_MAP: Record<string, AlertCategory> = {
+    medical: 'MEDICAL',
+    fire: 'MEDICAL',
+    hazmat: 'MEDICAL',
+    trapped: 'TRAPPED',
+    collapse: 'TRAPPED',
+    rescue: 'RESCUE',
+    flood: 'RESCUE',
+    food: 'FOOD',
+    water: 'FOOD',
+    info: 'GENERAL',
+    general: 'GENERAL',
 };
 
-function mapUrgency(type: string): LiveAlert['urgency'] {
-    return URGENCY_MAP[type.toLowerCase()] ?? 'rescue';
+function mapUrgency(type: string): AlertCategory {
+    return URGENCY_MAP[type.toLowerCase()] ?? 'GENERAL';
 }
 
 // ─── GPS Formatting ───────────────────────────────────────────────────────────

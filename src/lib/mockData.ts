@@ -1,6 +1,8 @@
+import type { AlertCategory } from './alertConfig';
+
 export interface LiveAlert {
     id: string;
-    urgency: "critical" | "rescue" | "info";
+    urgency: AlertCategory;
     source: "mesh" | "social";
     sourceDetails: string;
     title: string;
@@ -35,7 +37,7 @@ const staggerOffsets = [
 export const liveAlerts: LiveAlert[] = [
     {
         id: "ALT-001",
-        urgency: "critical",
+        urgency: "MEDICAL",
         source: "mesh",
         sourceDetails: "Verified GPS",
         title: "Building Collapse — Sector 7",
@@ -54,7 +56,7 @@ export const liveAlerts: LiveAlert[] = [
     },
     {
         id: "ALT-002",
-        urgency: "rescue",
+        urgency: "TRAPPED",
         source: "mesh",
         sourceDetails: "Verified GPS",
         title: "Family Trapped in Flooded Basement",
@@ -73,7 +75,7 @@ export const liveAlerts: LiveAlert[] = [
     },
     {
         id: "ALT-003",
-        urgency: "critical",
+        urgency: "MEDICAL",
         source: "social",
         sourceDetails: "NLP: 85%",
         title: "Gas Leak Near School Zone",
@@ -92,7 +94,7 @@ export const liveAlerts: LiveAlert[] = [
     },
     {
         id: "ALT-004",
-        urgency: "info",
+        urgency: "GENERAL",
         source: "social",
         sourceDetails: "NLP: 85%",
         title: "Road Blocked on Highway 101",
@@ -111,7 +113,7 @@ export const liveAlerts: LiveAlert[] = [
     },
     {
         id: "ALT-005",
-        urgency: "rescue",
+        urgency: "RESCUE",
         source: "mesh",
         sourceDetails: "Verified GPS",
         title: "Injured Hiker — Griffith Trail",
@@ -130,7 +132,7 @@ export const liveAlerts: LiveAlert[] = [
     },
     {
         id: "ALT-006",
-        urgency: "info",
+        urgency: "FOOD",
         source: "mesh",
         sourceDetails: "Verified GPS",
         title: "Shelter at Capacity — Convention Center",
@@ -149,7 +151,7 @@ export const liveAlerts: LiveAlert[] = [
     },
     {
         id: "ALT-007",
-        urgency: "critical",
+        urgency: "MEDICAL",
         source: "social",
         sourceDetails: "NLP: 85%",
         title: "Power Grid Failure — District 4",
@@ -168,7 +170,7 @@ export const liveAlerts: LiveAlert[] = [
     },
     {
         id: "ALT-008",
-        urgency: "rescue",
+        urgency: "RESCUE",
         source: "social",
         sourceDetails: "NLP: 85%",
         title: "Elderly Residents Stranded — Oak Manor",
@@ -191,7 +193,7 @@ export const liveAlerts: LiveAlert[] = [
    Dynamic mock alert generator for analytics testing
    ══════════════════════════════════════════════════════════════════ */
 
-const URGENCIES: LiveAlert["urgency"][] = ["critical", "rescue", "info"];
+const URGENCIES: LiveAlert["urgency"][] = ["MEDICAL", "RESCUE", "FOOD", "TRAPPED", "GENERAL", "OTHER"];
 const SOURCES: LiveAlert["source"][] = ["mesh", "social"];
 const ALERT_TYPES = ["Medical", "Rescue", "Fire", "Flood", "Collapse", "HazMat"];
 const NEEDS = [
@@ -309,18 +311,11 @@ export function generateMockAlerts(count: number = 40): {
         };
 
         /* ── Decide active vs resolved ── */
-        const isResolved = Math.random() < 0.35; // 35% resolved
-        if (isResolved) {
-            const resolutionDelay = randomBetween(15 * 60_000, 4 * HOUR); // 15min–4hr
-            resolved.push({
-                ...alert,
-                resolvedAt: new Date(createdAt + resolutionDelay).toISOString(),
-                duration: relativeTimeStr(resolutionDelay),
-                responders: Math.floor(Math.random() * 12) + 3,
-            });
-        } else {
-            active.push(alert);
-        }
+        // NOTE: resolved-split temporarily disabled for production transition.
+        // All generated alerts stay in the active queue; resolved data comes from real backend.
+        // const isResolved = Math.random() < 0.35;
+        // if (isResolved) { ... resolved.push(...) } else { active.push(alert); }
+        active.push(alert);
     }
 
     // Sort by most recent first
