@@ -78,6 +78,20 @@ export function AlertProvider({ children }: { children: ReactNode }) {
 
         socket.on('connect', () => {
             console.log('[Socket.IO] Connected to ResQMesh backend →', socket.id);
+
+            // Fetch alerts that arrived before this socket session started
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:5000'}/api/alerts`)
+                .then((r) => r.json())
+                .then(({ alerts }: { alerts: RawMeshPayload[] }) => {
+                    if (!Array.isArray(alerts)) return;
+                    const formatted = alerts.map(transformMeshAlert);
+                    setActiveAlerts((prev) => {
+                        const existingIds = new Set(prev.map((a) => a.id));
+                        const fresh = formatted.filter((a) => !existingIds.has(a.id));
+                        return [...fresh, ...prev];
+                    });
+                })
+                .catch((e) => console.warn('[Socket.IO] Failed to fetch alert history:', e));
         });
 
         socket.on('new_mesh_alert', (rawPayload: RawMeshPayload) => {
