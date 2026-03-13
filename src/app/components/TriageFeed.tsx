@@ -45,9 +45,9 @@ export default function TriageFeed({
             ? alerts
             : alerts.filter((a) => a.source === activeFilter);
 
-    // Sort by priority: MEDICAL(1) and TRAPPED(2) float to top
+    // Sort by most recent first (newest createdAt at the top)
     const filteredAlerts = [...baseFiltered].sort(
-        (a, b) => alertConfig[a.urgency].priority - alertConfig[b.urgency].priority
+        (a, b) => b.createdAt - a.createdAt
     );
 
     return (
@@ -64,8 +64,7 @@ export default function TriageFeed({
                     </h2>
                 </div>
                 <p className="theme-dim text-[11px]">
-                    {filteredAlerts.length} active alerts &middot; Sorted by
-                    urgency
+                    {filteredAlerts.length} active alerts &middot; Sorted by latest
                 </p>
 
                 {/* Filter buttons */}
