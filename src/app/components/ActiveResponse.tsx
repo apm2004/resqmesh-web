@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { LiveAlert } from "@/lib/mockData";
 import { useAlerts } from "@/context/AlertContext";
+import { alertConfig } from "@/lib/alertConfig";
 
 interface ActiveResponseProps {
     selectedAlert: LiveAlert | null;
@@ -63,14 +64,7 @@ const toastConfigs: Record<Exclude<ToastType, null>, ToastConfig> = {
     },
 };
 
-/* ── Badge colour map ── */
-const badgeStyle: Record<string, string> = {
-    Medical: "bg-red-500/20 text-red-500 border border-red-500/30",
-    Fire: "bg-orange-500/20 text-orange-500 border border-orange-500/30",
-    Rescue: "bg-amber-500/20 text-amber-500 border border-amber-500/30",
-    Flood: "bg-blue-500/20 text-blue-500 border border-blue-500/30",
-};
-const defaultBadge = "bg-red-500/20 text-red-500 border border-red-500/30";
+
 
 export default function ActiveResponse({ selectedAlert, onClearSelection }: ActiveResponseProps) {
     const { markAsResolved, acknowledgeAlert, isAcknowledged } = useAlerts();
@@ -116,8 +110,8 @@ export default function ActiveResponse({ selectedAlert, onClearSelection }: Acti
     /* ── render nothing when no alert is selected ── */
     if (!selectedAlert) return null;
 
-    const badge = badgeStyle[selectedAlert.alertType] ?? defaultBadge;
     const toast = activeToast ? toastConfigs[activeToast] : null;
+    const cfg = alertConfig[selectedAlert.urgency];
 
     return (
         <div className="relative bg-white/60 dark:bg-black/40 backdrop-blur-md border border-slate-300 dark:border-white/10 rounded-2xl p-5 animate-fade-in-up space-y-4">
@@ -152,9 +146,9 @@ export default function ActiveResponse({ selectedAlert, onClearSelection }: Acti
             {/* ── 2. Badges row ── */}
             <div className="flex items-center gap-2">
                 <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${badge}`}
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color} border ${cfg.border}`}
                 >
-                    {selectedAlert.alertType}
+                    {selectedAlert.urgency}
                 </span>
                 <span className="text-slate-400 dark:text-white/40 text-[11px]">
                     ID: {selectedAlert.userId}
@@ -164,7 +158,7 @@ export default function ActiveResponse({ selectedAlert, onClearSelection }: Acti
             {/* ── 3. Title & message ── */}
             <div>
                 <h2 className="text-slate-900 dark:text-white font-bold text-xl leading-tight">
-                    {selectedAlert.alertType}
+                    {selectedAlert.title}
                 </h2>
                 <p className="text-slate-600 dark:text-white/80 text-sm mt-1 leading-relaxed">
                     {selectedAlert.message}
