@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import GlassNav from "../components/GlassNav";
 import { useAlerts } from "@/context/AlertContext";
 import { useTheme } from "../components/ThemeContext";
+import { alertConfig, ALERT_CATEGORIES } from "@/lib/alertConfig";
 
 const AnalyticsMiniMap = dynamic(() => import("../components/AnalyticsMiniMap"), {
     ssr: false,
@@ -100,7 +101,7 @@ export default function AnalyticsPage() {
 
     const totalProcessed = allAlerts.length;
     const activeCritical = activeAlerts.filter(
-        (a) => a.urgency === "critical"
+        (a) => a.urgency === "MEDICAL"
     ).length;
     const incidentsResolved = resolvedAlerts.length;
 
@@ -130,40 +131,23 @@ export default function AnalyticsPage() {
         },
     ];
 
-    /* Urgency breakdown (based on active alerts) */
+    /* Urgency breakdown — 6 categories derived from alertConfig */
     const activeTotal = activeAlerts.length || 1;
-    const criticalPct = Math.round(
-        (activeAlerts.filter((a) => a.urgency === "critical").length /
-            activeTotal) *
-        100
-    );
-    const rescuePct = Math.round(
-        (activeAlerts.filter((a) => a.urgency === "rescue").length /
-            activeTotal) *
-        100
-    );
-    const infoPct = 100 - criticalPct - rescuePct;
-
-    const urgencyBreakdown = [
-        {
-            label: "Critical",
-            pct: criticalPct,
-            gradient: "from-red-600 to-red-400",
-            badge: "text-red-400",
-        },
-        {
-            label: "Rescue",
-            pct: rescuePct,
-            gradient: "from-orange-500 to-amber-400",
-            badge: "text-orange-400",
-        },
-        {
-            label: "Info",
-            pct: infoPct,
-            gradient: "from-blue-500 to-sky-400",
-            badge: "text-blue-400",
-        },
-    ];
+    const urgencyBreakdown = ALERT_CATEGORIES.map((cat) => {
+        const count = activeAlerts.filter((a) => a.urgency === cat).length;
+        const pct = Math.round((count / activeTotal) * 100);
+        const cfg = alertConfig[cat];
+        // Derive gradient from the text color class: text-red-500 → from-red-500 to-red-400
+        const base = cfg.color.replace('text-', '');          // e.g. "red-500"
+        const gradientClass = `from-${base} to-${base.replace('-500', '-400').replace('-400', '-300')}`;
+        return {
+            label: cfg.label,
+            pct,
+            count,
+            textColor: cfg.color,
+            gradientClass,
+        };
+    });
 
     /* KPI cards */
     const kpis = [
@@ -272,14 +256,14 @@ export default function AnalyticsPage() {
                                                 {u.label}
                                             </span>
                                             <span
-                                                className={`text-xs font-bold ${u.badge}`}
+                                                className={`text-xs font-bold ${u.textColor}`}
                                             >
-                                                {u.pct}%
+                                                {u.count} ({u.pct}%)
                                             </span>
                                         </div>
                                         <div className="h-2.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
                                             <div
-                                                className={`h-full rounded-full bg-gradient-to-r ${u.gradient} transition-all duration-1000 ease-out progress-glow`}
+                                                className={`h-full rounded-full bg-gradient-to-r ${u.gradientClass} transition-all duration-1000 ease-out progress-glow`}
                                                 style={{
                                                     width: `${u.pct}%`,
                                                 }}

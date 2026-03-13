@@ -39,9 +39,12 @@ function makeSOSIcon(color: string, glowColor: string, size: number = 30) {
 }
 
 const urgencyColor: Record<LiveAlert["urgency"], { fill: string; glow: string }> = {
-    critical: { fill: "#ef4444", glow: "#ff0000" },
-    rescue: { fill: "#f97316", glow: "#ff6600" },
-    info: { fill: "#3b82f6", glow: "#0066ff" },
+    MEDICAL: { fill: "#ef4444", glow: "#ff0000" },
+    TRAPPED: { fill: "#a855f7", glow: "#9900ff" },
+    RESCUE: { fill: "#f97316", glow: "#ff6600" },
+    FOOD: { fill: "#06b6d4", glow: "#00ccff" },
+    GENERAL: { fill: "#64748b", glow: "#94a3b8" },
+    OTHER: { fill: "#475569", glow: "#64748b" },
 };
 
 const tileUrls = {
