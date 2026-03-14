@@ -13,7 +13,8 @@ import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { type LiveAlert } from "@/lib/mockData";
 import { transformMeshAlert, type RawMeshPayload } from "@/lib/transformMeshAlert";
-import { fetchRedditAlerts, POLL_INTERVAL_MS } from "@/lib/redditPoller";
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:5000";
 
 /* ── Resolved alert extends LiveAlert with a resolution timestamp ── */
 export interface ResolvedAlert extends LiveAlert {
@@ -38,6 +39,12 @@ const AlertContext = createContext<AlertContextValue>({
     isAcknowledged: () => false,
 });
 
+/* ── Dedup helper ── */
+function mergeUnique(prev: LiveAlert[], incoming: LiveAlert[]): LiveAlert[] {
+    const existingIds = new Set(prev.map((a) => a.id));
+    const fresh = incoming.filter((a) => !existingIds.has(a.id));
+    return fresh.length ? [...fresh, ...prev] : prev;
+}
 
 export function AlertProvider({ children }: { children: ReactNode }) {
     const [activeAlerts, setActiveAlerts] = useState<LiveAlert[]>([]);
@@ -52,113 +59,88 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         return acknowledgedIds.current.has(alertId);
     }, []);
 
-    /* ── Live backend: Socket.IO connection ── */
+    /* ── Socket.IO: mesh alerts + Reddit alerts via backend ── */
     useEffect(() => {
-        const socket = io(
-            process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:5000',
-            { transports: ['websocket', 'polling'] }
-        );
+        const socket = io(BACKEND, { transports: ["websocket", "polling"] });
 
-        socket.on('connect', () => {
-            console.log('[Socket.IO] Connected to ResQMesh backend →', socket.id);
+        socket.on("connect", () => {
+            console.log("[Socket.IO] Connected →", socket.id);
 
-            // Fetch alerts that arrived before this socket session started
-            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:5000'}/api/alerts`)
+            // ── Hydrate mesh alerts from DB ──
+            fetch(`${BACKEND}/api/alerts`)
                 .then((r) => r.json())
                 .then(({ alerts }: { alerts: RawMeshPayload[] }) => {
                     if (!Array.isArray(alerts)) return;
                     const formatted = alerts.map(transformMeshAlert);
-                    setActiveAlerts((prev) => {
-                        const existingIds = new Set(prev.map((a) => a.id));
-                        const fresh = formatted.filter((a) => !existingIds.has(a.id));
-                        return [...fresh, ...prev];
-                    });
+                    setActiveAlerts((prev) => mergeUnique(prev, formatted));
                 })
-                .catch((e) => console.warn('[Socket.IO] Failed to fetch alert history:', e));
+                .catch((e) => console.warn("[Socket.IO] Mesh history fetch failed:", e));
+
+            // ── Hydrate Reddit alerts from DB (silently, no toasts) ──
+            fetch(`${BACKEND}/api/reddit-alerts`)
+                .then((r) => r.json())
+                .then(({ alerts }: { alerts: LiveAlert[] }) => {
+                    if (!Array.isArray(alerts)) return;
+                    setActiveAlerts((prev) => mergeUnique(prev, alerts));
+                })
+                .catch((e) => console.warn("[Socket.IO] Reddit history fetch failed:", e));
         });
 
-        socket.on('new_mesh_alert', (rawPayload: RawMeshPayload) => {
+        /* ── New mesh alert from hardware ── */
+        socket.on("new_mesh_alert", (rawPayload: RawMeshPayload) => {
             const formatted = transformMeshAlert(rawPayload);
-
             setActiveAlerts((prev) => {
-                // Duplicate guard — mesh re-broadcasts can deliver the same ID twice
                 if (prev.some((a) => a.id === formatted.id)) return prev;
                 return [formatted, ...prev];
             });
-
-            // HUD-style toast
             toast.custom(
                 (t) => (
                     <div
                         className={`bg-red-500/10 border border-red-500/50 backdrop-blur-md text-white
                             px-6 py-3 rounded-full shadow-[0_0_20px_rgba(239,68,68,0.4)]
                             flex items-center gap-3 transition-all duration-300
-                            ${t.visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                            ${t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
                     >
                         <span className="text-lg">🚨</span>
                         <span className="text-sm font-semibold tracking-wide">
-                            New Mesh Alert Detected: {formatted.title}
+                            New Mesh Alert: {formatted.title}
                         </span>
                     </div>
                 ),
-                { position: 'bottom-center', duration: 6000 }
+                { position: "bottom-center", duration: 6000 }
+            );
+        });
+
+        /* ── New Reddit alert — server polled + saved to DB ── */
+        socket.on("new_reddit_alert", (alert: LiveAlert) => {
+            setActiveAlerts((prev) => {
+                if (prev.some((a) => a.id === alert.id)) return prev;
+                return [alert, ...prev];
+            });
+            toast.custom(
+                (t) => (
+                    <div
+                        className={`bg-orange-500/10 border border-orange-500/50 backdrop-blur-md text-white
+                            px-6 py-3 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.4)]
+                            flex items-center gap-3 transition-all duration-300
+                            ${t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
+                    >
+                        <span className="text-lg">📲</span>
+                        <span className="text-sm font-semibold tracking-wide">
+                            Reddit Alert: {alert.title}
+                        </span>
+                    </div>
+                ),
+                { position: "bottom-center", duration: 6000 }
             );
         });
 
         return () => {
-            socket.off('new_mesh_alert');
+            socket.off("new_mesh_alert");
+            socket.off("new_reddit_alert");
             socket.disconnect();
-            console.log('[Socket.IO] Disconnected from ResQMesh backend');
+            console.log("[Socket.IO] Disconnected");
         };
-    }, []);
-
-    /* ── Reddit poller: fetch r/ResQMeshAlerts every 60 seconds ── */
-    useEffect(() => {
-        const seenRedditIds = new Set<string>();
-
-        async function poll() {
-            const redditAlerts = await fetchRedditAlerts();
-            if (redditAlerts.length === 0) return;
-
-            const newAlerts = redditAlerts.filter(a => !seenRedditIds.has(a.id));
-            if (newAlerts.length === 0) return;
-
-            newAlerts.forEach(a => seenRedditIds.add(a.id));
-
-            setActiveAlerts(prev => {
-                // Deduplicate against existing alerts
-                const incoming = newAlerts.filter(
-                    a => !prev.some(p => p.id === a.id)
-                );
-                if (incoming.length === 0) return prev;
-                return [...incoming, ...prev];
-            });
-
-            // Toast for each new Reddit alert
-            newAlerts.forEach(alert => {
-                toast.custom(
-                    (t) => (
-                        <div
-                            className={`bg-blue-500/10 border border-blue-500/50 backdrop-blur-md text-white
-                                px-6 py-3 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)]
-                                flex items-center gap-3 transition-all duration-300
-                                ${t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
-                        >
-                            <span className="text-lg">🐦</span>
-                            <span className="text-sm font-semibold tracking-wide">
-                                Reddit Alert: {alert.title}
-                            </span>
-                        </div>
-                    ),
-                    { position: "bottom-center", duration: 6000 }
-                );
-            });
-        }
-
-        // Run immediately, then every POLL_INTERVAL_MS
-        poll();
-        const redditInterval = setInterval(poll, POLL_INTERVAL_MS);
-        return () => clearInterval(redditInterval);
     }, []);
 
     const markAsResolved = useCallback((alertId: string) => {
@@ -174,9 +156,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
             };
 
             setResolvedAlerts((prevResolved) => {
-                if (prevResolved.some((a) => a.id === alertId)) {
-                    return prevResolved;
-                }
+                if (prevResolved.some((a) => a.id === alertId)) return prevResolved;
                 return [resolved, ...prevResolved];
             });
 
