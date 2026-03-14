@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import MapSearchBar from "./MapSearchBar";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LiveAlert } from "@/lib/mockData";
@@ -38,9 +39,12 @@ function makeSOSIcon(color: string, glowColor: string, size: number = 30) {
 }
 
 const urgencyColor: Record<LiveAlert["urgency"], { fill: string; glow: string }> = {
-    critical: { fill: "#ef4444", glow: "#ff0000" },
-    rescue: { fill: "#f97316", glow: "#ff6600" },
-    info: { fill: "#3b82f6", glow: "#0066ff" },
+    MEDICAL: { fill: "#ef4444", glow: "#ff0000" },
+    TRAPPED: { fill: "#a855f7", glow: "#9900ff" },
+    RESCUE: { fill: "#f97316", glow: "#ff6600" },
+    FOOD: { fill: "#06b6d4", glow: "#00ccff" },
+    GENERAL: { fill: "#64748b", glow: "#94a3b8" },
+    OTHER: { fill: "#475569", glow: "#64748b" },
 };
 
 const tileUrls = {
@@ -65,6 +69,7 @@ interface MapViewProps {
     selectedAlert: LiveAlert | null;
     onSelectAlert: (alert: LiveAlert) => void;
     className?: string;
+    showSearchBar?: boolean;
 }
 
 export default function MapView({
@@ -72,6 +77,7 @@ export default function MapView({
     selectedAlert,
     onSelectAlert,
     className = "",
+    showSearchBar = false,
 }: MapViewProps) {
     const center: [number, number] = [34.055, -118.255];
     const { theme } = useTheme();
@@ -89,6 +95,7 @@ export default function MapView({
                 url={tileUrls[theme]}
             />
             <FlyTo alert={selectedAlert} />
+            {showSearchBar && <MapSearchBar />}
 
             {alerts.map((alert) => {
                 const isSelected = selectedAlert?.id === alert.id;

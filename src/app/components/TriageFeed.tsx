@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LiveAlert } from "@/lib/mockData";
+import { alertConfig } from "@/lib/alertConfig";
 
 interface TriageFeedProps {
     alerts: LiveAlert[];
@@ -11,12 +12,6 @@ interface TriageFeedProps {
 }
 
 type FilterType = "all" | "mesh" | "social";
-
-const urgencyBorderClass: Record<LiveAlert["urgency"], string> = {
-    critical: "border-glow-red",
-    rescue: "border-glow-orange",
-    info: "border-glow-blue",
-};
 
 const filterConfig: Record<FilterType, { label: string; active: string }> = {
     all: {
@@ -45,10 +40,15 @@ export default function TriageFeed({
 }: TriageFeedProps) {
     const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
-    const filteredAlerts =
+    const baseFiltered =
         activeFilter === "all"
             ? alerts
             : alerts.filter((a) => a.source === activeFilter);
+
+    // Sort by most recent first (newest createdAt at the top)
+    const filteredAlerts = [...baseFiltered].sort(
+        (a, b) => b.createdAt - a.createdAt
+    );
 
     return (
         <div className="glass flex flex-col h-full overflow-hidden">
@@ -64,8 +64,7 @@ export default function TriageFeed({
                     </h2>
                 </div>
                 <p className="theme-dim text-[11px]">
-                    {filteredAlerts.length} active alerts &middot; Sorted by
-                    urgency
+                    {filteredAlerts.length} active alerts &middot; Sorted by latest
                 </p>
 
                 {/* Filter buttons */}
@@ -112,10 +111,11 @@ export default function TriageFeed({
                                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                     onClick={() => onSelectAlert(alert)}
-                                    className={`${urgencyBorderClass[alert.urgency]} rounded-xl p-3 cursor-pointer transition-colors duration-200 mb-2.5 ${isSelected
-                                        ? "theme-surface-active ring-1 ring-[var(--divider-strong)]"
+                                    className={`border rounded-xl p-3 cursor-pointer transition-colors duration-200 mb-2.5 ${alertConfig[alert.urgency].border} ${alertConfig[alert.urgency].bg} ${isSelected
+                                        ? "ring-1 ring-[var(--divider-strong)] theme-surface-active"
                                         : "theme-surface theme-surface-hover"
                                         }`}
+                                    style={{ boxShadow: alertConfig[alert.urgency].glow }}
                                 >
                                     {/* Source badge + urgency */}
                                     <div className="flex items-center justify-between mb-1.5">
@@ -131,14 +131,9 @@ export default function TriageFeed({
                                             </span>
                                         )}
                                         <span
-                                            className={`text-[9px] font-bold uppercase tracking-wider ${alert.urgency === "critical"
-                                                ? "text-red-400"
-                                                : alert.urgency === "rescue"
-                                                    ? "text-orange-400"
-                                                    : "text-blue-400"
-                                                }`}
+                                            className={`text-[9px] font-bold uppercase tracking-wider ${alertConfig[alert.urgency].color}`}
                                         >
-                                            {alert.urgency}
+                                            {alertConfig[alert.urgency].label}
                                         </span>
                                     </div>
 
