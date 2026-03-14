@@ -101,7 +101,7 @@ export default function AnalyticsPage() {
 
     const totalProcessed = allAlerts.length;
     const activeCritical = activeAlerts.filter(
-        (a) => a.urgency === "MEDICAL"
+        (a) => a.urgency === "MEDICAL" || a.urgency === "TRAPPED"
     ).length;
     const incidentsResolved = resolvedAlerts.length;
 
@@ -132,20 +132,26 @@ export default function AnalyticsPage() {
     ];
 
     /* Urgency breakdown — 6 categories derived from alertConfig */
+    const barColors: Record<string, string> = {
+        MEDICAL: 'bg-red-500',
+        TRAPPED: 'bg-purple-500',
+        RESCUE: 'bg-orange-500',
+        FOOD: 'bg-cyan-500',
+        GENERAL: 'bg-slate-400',
+        OTHER: 'bg-slate-500',
+    };
+
     const activeTotal = activeAlerts.length || 1;
     const urgencyBreakdown = ALERT_CATEGORIES.map((cat) => {
         const count = activeAlerts.filter((a) => a.urgency === cat).length;
         const pct = Math.round((count / activeTotal) * 100);
         const cfg = alertConfig[cat];
-        // Derive gradient from the text color class: text-red-500 → from-red-500 to-red-400
-        const base = cfg.color.replace('text-', '');          // e.g. "red-500"
-        const gradientClass = `from-${base} to-${base.replace('-500', '-400').replace('-400', '-300')}`;
         return {
+            id: cat,
             label: cfg.label,
             pct,
             count,
             textColor: cfg.color,
-            gradientClass,
         };
     });
 
@@ -153,7 +159,7 @@ export default function AnalyticsPage() {
     const kpis = [
         { label: "Total Alerts Processed", value: totalProcessed, accent: "" },
         {
-            label: "Active Critical Threats",
+            label: "High Priority Alerts",
             value: activeCritical,
             accent: activeCritical > 0 ? "text-red-500 animate-pulse-glow" : "",
         },
@@ -263,7 +269,7 @@ export default function AnalyticsPage() {
                                         </div>
                                         <div className="h-2.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
                                             <div
-                                                className={`h-full rounded-full bg-gradient-to-r ${u.gradientClass} transition-all duration-1000 ease-out progress-glow`}
+                                                className={`h-full rounded-full ${barColors[u.id]} transition-all duration-1000 ease-out progress-glow`}
                                                 style={{
                                                     width: `${u.pct}%`,
                                                 }}
