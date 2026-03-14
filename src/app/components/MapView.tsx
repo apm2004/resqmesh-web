@@ -38,13 +38,17 @@ function makeSOSIcon(color: string, glowColor: string, size: number = 30) {
     });
 }
 
-const urgencyColor: Record<LiveAlert["urgency"], { fill: string; glow: string }> = {
-    MEDICAL: { fill: "#ef4444", glow: "#ff0000" },
-    TRAPPED: { fill: "#a855f7", glow: "#9900ff" },
-    RESCUE: { fill: "#f97316", glow: "#ff6600" },
-    FOOD: { fill: "#06b6d4", glow: "#00ccff" },
-    GENERAL: { fill: "#64748b", glow: "#94a3b8" },
-    OTHER: { fill: "#475569", glow: "#64748b" },
+const FALLBACK_COLOR = { fill: "#475569", glow: "#64748b" };
+
+// Covers both uppercase mesh enums (MEDICAL, TRAPPED…) and lowercase
+// Reddit poller values (critical, rescue, info).
+const urgencyColor: Record<string, { fill: string; glow: string }> = {
+    MEDICAL:  { fill: "#ef4444", glow: "#ff0000" },
+    TRAPPED:  { fill: "#a855f7", glow: "#9900ff" },
+    RESCUE:   { fill: "#f97316", glow: "#ff6600" },
+    FOOD:     { fill: "#06b6d4", glow: "#00ccff" },
+    GENERAL:  { fill: "#64748b", glow: "#94a3b8" },
+    OTHER:    { fill: "#475569", glow: "#64748b" },
 };
 
 const tileUrls = {
@@ -99,7 +103,7 @@ export default function MapView({
 
             {alerts.map((alert) => {
                 const isSelected = selectedAlert?.id === alert.id;
-                const colors = urgencyColor[alert.urgency];
+                const colors = urgencyColor[alert.urgency] ?? FALLBACK_COLOR;
                 const icon = makeSOSIcon(
                     colors.fill,
                     colors.glow,

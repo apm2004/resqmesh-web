@@ -18,3 +18,4 @@ export interface LiveAlert {
     coordinates: string;
     createdAt: number;
 }
+
