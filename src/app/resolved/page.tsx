@@ -113,12 +113,7 @@ export default function ResolvedPage() {
                                                 <MapPin className="h-3 w-3 text-slate-400 dark:text-white/40" />
                                                 {alert.location}
                                             </span>
-                                            <div className="flex items-center gap-4">
-                                                <span className="flex items-center gap-1.5">
-                                                    <Users className="h-3 w-3 text-slate-400 dark:text-white/40" />
-                                                    {alert.responders} responders
-                                                </span>
-                                            </div>
+
                                         </div>
 
                                         {/* Resolved timestamp */}
@@ -126,6 +121,9 @@ export default function ResolvedPage() {
                                             <span className="text-[10px] text-green-400/70 font-semibold uppercase tracking-wider">
                                                 Resolved {formatResolvedAt(alert.resolvedAt)}
                                             </span>
+                                            <p className="text-slate-400 text-xs mt-0.5">
+                                                {new Date(alert.resolvedAt || alert.createdAt).toLocaleString()}
+                                            </p>
                                         </div>
                                     </div>
                                 ))
@@ -152,12 +150,7 @@ export default function ResolvedPage() {
                                         value={totalResolved}
                                         accent="text-green-400"
                                     />
-                                    <StatCard
-                                        icon={Users}
-                                        label="Responders Deployed"
-                                        value={totalResponders}
-                                        accent="text-blue-400"
-                                    />
+
                                 </div>
                             </div>
 

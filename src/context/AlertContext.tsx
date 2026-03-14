@@ -11,7 +11,7 @@ import {
 } from "react";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
-import { liveAlerts, generateMockAlerts, type LiveAlert } from "@/lib/mockData";
+import { type LiveAlert } from "@/lib/mockData";
 import { transformMeshAlert, type RawMeshPayload } from "@/lib/transformMeshAlert";
 
 /* ── Resolved alert extends LiveAlert with a resolution timestamp ── */
@@ -37,18 +37,10 @@ const AlertContext = createContext<AlertContextValue>({
     isAcknowledged: () => false,
 });
 
-/* ── Simulation config ── */
-const INITIAL_COUNT = 5; // start with first 5 alerts
-const INTERVAL_MS = 12_000; // new alert every 12 seconds
-
 export function AlertProvider({ children }: { children: ReactNode }) {
-    const [activeAlerts, setActiveAlerts] = useState<LiveAlert[]>(
-        () => liveAlerts.slice(0, INITIAL_COUNT)
-    );
+    const [activeAlerts, setActiveAlerts] = useState<LiveAlert[]>([]);
     const [resolvedAlerts, setResolvedAlerts] = useState<ResolvedAlert[]>([]);
-    const pendingAlerts = useRef<LiveAlert[]>(liveAlerts.slice(INITIAL_COUNT));
     const acknowledgedIds = useRef<Set<string>>(new Set());
-    const hasHydrated = useRef(false);
 
     const acknowledgeAlert = useCallback((alertId: string) => {
         acknowledgedIds.current.add(alertId);
@@ -56,17 +48,6 @@ export function AlertProvider({ children }: { children: ReactNode }) {
 
     const isAcknowledged = useCallback((alertId: string) => {
         return acknowledgedIds.current.has(alertId);
-    }, []);
-
-    /* ── Hydrate mock analytics data only on client ── */
-    useEffect(() => {
-        if (hasHydrated.current) return;
-        hasHydrated.current = true;
-
-        // Production transition: seed exactly 5 pending alerts, no resolved mock data
-        const generatedAlerts = generateMockAlerts(5);
-        setActiveAlerts(generatedAlerts.active);
-        setResolvedAlerts([]);
     }, []);
 
     /* ── Live backend: Socket.IO connection ── */
@@ -78,6 +59,20 @@ export function AlertProvider({ children }: { children: ReactNode }) {
 
         socket.on('connect', () => {
             console.log('[Socket.IO] Connected to ResQMesh backend →', socket.id);
+
+            // Fetch alerts that arrived before this socket session started
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:5000'}/api/alerts`)
+                .then((r) => r.json())
+                .then(({ alerts }: { alerts: RawMeshPayload[] }) => {
+                    if (!Array.isArray(alerts)) return;
+                    const formatted = alerts.map(transformMeshAlert);
+                    setActiveAlerts((prev) => {
+                        const existingIds = new Set(prev.map((a) => a.id));
+                        const fresh = formatted.filter((a) => !existingIds.has(a.id));
+                        return [...fresh, ...prev];
+                    });
+                })
+                .catch((e) => console.warn('[Socket.IO] Failed to fetch alert history:', e));
         });
 
         socket.on('new_mesh_alert', (rawPayload: RawMeshPayload) => {
@@ -89,7 +84,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                 return [formatted, ...prev];
             });
 
-            // HUD-style toast matching the existing simulation style
+            // HUD-style toast
             toast.custom(
                 (t) => (
                     <div
@@ -115,43 +110,6 @@ export function AlertProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    /* ── Simulation interval: drip-feed pending alerts ── */
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (pendingAlerts.current.length === 0) return;
-
-            const next = pendingAlerts.current[0];
-            pendingAlerts.current = pendingAlerts.current.slice(1);
-
-            // Add to front of active alerts
-            setActiveAlerts((prev) => {
-                // Duplicate guard (strict mode)
-                if (prev.some((a) => a.id === next.id)) return prev;
-                return [{ ...next, createdAt: Date.now() }, ...prev];
-            });
-
-            // Fire HUD-style incoming alert toast
-            toast.custom(
-                (t) => (
-                    <div
-                        className={`bg-red-500/10 border border-red-500/50 backdrop-blur-md text-white
-                            px-6 py-3 rounded-full shadow-[0_0_20px_rgba(239,68,68,0.4)]
-                            flex items-center gap-3 transition-all duration-300
-                            ${t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
-                    >
-                        <span className="text-lg">🚨</span>
-                        <span className="text-sm font-semibold tracking-wide">
-                            New Alert Detected: {next.title}
-                        </span>
-                    </div>
-                ),
-                { position: "bottom-center", duration: 5000 }
-            );
-        }, INTERVAL_MS);
-
-        return () => clearInterval(interval);
-    }, []);
-
     const markAsResolved = useCallback((alertId: string) => {
         setActiveAlerts((prev) => {
             const alert = prev.find((a) => a.id === alertId);
@@ -161,7 +119,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                 ...alert,
                 resolvedAt: new Date().toISOString(),
                 duration: alert.time,
-                responders: Math.floor(Math.random() * 12) + 3,
+                responders: 0,
             };
 
             setResolvedAlerts((prevResolved) => {
