@@ -58,6 +58,67 @@ const alertTypeKeywords: Record<string, string[]> = {
     Rescue:  ["trapped", "stranded", "rescue", "collapsed", "buried", "missing"],
 };
 
+// ── Comprehensive disaster-relevance keywords (NLP gate) ─────────────────────
+// A post must contain at least ONE of these keywords (or have a valid flair)
+// to be considered disaster-relevant.
+const DISASTER_KEYWORDS: string[] = [
+    // --- Critical / life-threatening ---
+    "trapped", "collapse", "collapsed", "sos", "mayday", "explosion",
+    "gas leak", "casualties", "critical", "urgent", "people died",
+    "dead", "death toll", "fatalities", "life threatening",
+
+    // --- Rescue / stranded ---
+    "stranded", "stuck", "need rescue", "cut off", "rescue",
+    "missing", "buried", "pinned", "help needed", "help us",
+    "please help", "save us", "send help", "need assistance",
+
+    // --- Fire ---
+    "fire", "smoke", "burning", "blaze", "wildfire", "fire spreading",
+    "inferno", "arson", "engulfed",
+
+    // --- Flood / water ---
+    "flood", "flooded", "flooding", "water rising", "submerged",
+    "drainage", "waterlogged", "inundated", "flash flood", "dam breach",
+    "levee", "overflow",
+
+    // --- Weather / natural disaster ---
+    "earthquake", "quake", "tremor", "aftershock", "tsunami",
+    "cyclone", "hurricane", "typhoon", "tornado", "storm",
+    "landslide", "mudslide", "avalanche", "volcanic", "eruption",
+    "hailstorm", "lightning strike", "drought",
+
+    // --- Medical ---
+    "injured", "medical", "hospital", "ambulance", "trauma",
+    "unconscious", "bleeding", "fracture", "cardiac", "oxygen",
+    "first aid", "emergency medical", "casualty", "wound",
+
+    // --- Infrastructure ---
+    "power outage", "grid failure", "blackout", "no electricity",
+    "road blocked", "bridge collapse", "road collapse", "building collapse",
+    "structural damage", "debris", "rubble",
+
+    // --- Shelter / displacement ---
+    "shelter needed", "displaced", "evacuating", "evacuation",
+    "homeless", "refugee", "relief camp", "tent", "temporary shelter",
+
+    // --- Food / water / supplies ---
+    "food", "water", "supplies needed", "rations", "drinking water",
+    "starvation", "dehydration", "hunger", "no food", "no water",
+
+    // --- General distress ---
+    "emergency", "disaster", "catastrophe", "crisis", "devastation",
+    "destruction", "danger", "hazard", "warning", "alert",
+    "distress", "calamity", "severe", "desperate",
+];
+
+/**
+ * Returns true if the post text contains at least one disaster-relevant keyword.
+ */
+function isDisasterRelevant(text: string): boolean {
+    const lower = text.toLowerCase();
+    return DISASTER_KEYWORDS.some(kw => lower.includes(kw));
+}
+
 // ── Flair → AlertCategory canonical mapping ──────────────────────────────────
 const FLAIR_TO_CATEGORY: Record<string, AlertCategory> = {
     'medical':         'MEDICAL',
@@ -140,7 +201,10 @@ function timeAgo(utcSeconds: number): string {
     const minutes = Math.floor(diffMs / 60_000);
     if (minutes < 1)  return "just now";
     if (minutes < 60) return `${minutes} min ago`;
-    return `${Math.floor(minutes / 60)} hr ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days > 1 ? "s" : ""} ago`;
 }
 
 // ── Reddit JSON types ─────────────────────────────────────────────────────────
@@ -200,8 +264,22 @@ export async function fetchRedditAlerts(): Promise<LiveAlert[]> {
             (c: { data: RedditPost }) => c.data
         ) ?? [];
 
-        // Geocode all posts concurrently
-        return await Promise.all(posts.map(redditPostToAlert));
+        // ── NLP keyword gate: only keep disaster-relevant posts ──────────
+        const relevantPosts = posts.filter(post => {
+            const flair = (post.link_flair_text ?? "").trim().toLowerCase();
+            if (flair && FLAIR_TO_CATEGORY[flair]) return true;       // flair wins
+            const fullText = `${post.title} ${post.selftext}`;
+            return isDisasterRelevant(fullText);
+        });
+
+        if (relevantPosts.length < posts.length) {
+            console.log(
+                `[RedditPoller] NLP filter: ${relevantPosts.length}/${posts.length} posts are disaster-relevant`
+            );
+        }
+
+        // Geocode all relevant posts concurrently
+        return await Promise.all(relevantPosts.map(redditPostToAlert));
     } catch (err) {
         console.error("[RedditPoller] Failed to fetch:", err);
         return [];
