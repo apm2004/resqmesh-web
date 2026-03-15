@@ -59,64 +59,76 @@ const alertTypeKeywords: Record<string, string[]> = {
 };
 
 // ── Comprehensive disaster-relevance keywords (NLP gate) ─────────────────────
-// A post must contain at least ONE of these keywords (or have a valid flair)
-// to be considered disaster-relevant.
+// A post must contain at least ONE of these keywords in its title or body text.
+// Flair is intentionally ignored — users can set any flair on any post.
+//
+// IMPORTANT: Keep this list SPECIFIC. Avoid broad single words that appear
+// in everyday speech (e.g. "warning", "alert", "missing", "hospital").
 const DISASTER_KEYWORDS: string[] = [
     // --- Critical / life-threatening ---
     "trapped", "collapse", "collapsed", "sos", "mayday", "explosion",
-    "gas leak", "casualties", "critical", "urgent", "people died",
-    "dead", "death toll", "fatalities", "life threatening",
+    "gas leak", "casualties", "people died", "urgent rescue",
+    "death toll", "fatalities", "life-threatening",
 
     // --- Rescue / stranded ---
-    "stranded", "stuck", "need rescue", "cut off", "rescue",
-    "missing", "buried", "pinned", "help needed", "help us",
+    "stranded", "need rescue", "cut off",
+    "buried", "pinned", "help needed", "help us",
     "please help", "save us", "send help", "need assistance",
+    "rescue needed", "rescue operation",
 
     // --- Fire ---
-    "fire", "smoke", "burning", "blaze", "wildfire", "fire spreading",
-    "inferno", "arson", "engulfed",
+    "wildfire", "fire spreading", "building on fire", "house fire",
+    "blaze", "inferno", "arson", "engulfed in flames",
+    "smoke inhalation", "burning building",
 
     // --- Flood / water ---
-    "flood", "flooded", "flooding", "water rising", "submerged",
-    "drainage", "waterlogged", "inundated", "flash flood", "dam breach",
-    "levee", "overflow",
+    "flooded", "flooding", "water rising", "submerged",
+    "waterlogged", "inundated", "flash flood", "dam breach",
+    "levee breach", "overflow",
 
     // --- Weather / natural disaster ---
     "earthquake", "quake", "tremor", "aftershock", "tsunami",
-    "cyclone", "hurricane", "typhoon", "tornado", "storm",
-    "landslide", "mudslide", "avalanche", "volcanic", "eruption",
+    "cyclone", "hurricane", "typhoon", "tornado",
+    "landslide", "mudslide", "avalanche", "volcanic eruption",
     "hailstorm", "lightning strike", "drought",
 
-    // --- Medical ---
-    "injured", "medical", "hospital", "ambulance", "trauma",
-    "unconscious", "bleeding", "fracture", "cardiac", "oxygen",
-    "first aid", "emergency medical", "casualty", "wound",
+    // --- Medical emergency ---
+    "seriously injured", "critically injured", "ambulance needed",
+    "medical emergency", "trauma victim", "cardiac arrest",
+    "unconscious", "emergency medical", "mass casualty",
 
     // --- Infrastructure ---
     "power outage", "grid failure", "blackout", "no electricity",
     "road blocked", "bridge collapse", "road collapse", "building collapse",
-    "structural damage", "debris", "rubble",
+    "structural damage", "debris",
 
     // --- Shelter / displacement ---
-    "shelter needed", "displaced", "evacuating", "evacuation",
-    "homeless", "refugee", "relief camp", "tent", "temporary shelter",
+    "shelter needed", "displaced", "evacuating", "evacuation order",
+    "relief camp", "temporary shelter",
 
     // --- Food / water / supplies ---
-    "food", "water", "supplies needed", "rations", "drinking water",
-    "starvation", "dehydration", "hunger", "no food", "no water",
+    "food supplies", "water supplies", "supplies needed", "rations",
+    "drinking water shortage", "starvation", "dehydration",
+    "no food", "no water", "need food", "need water",
 
-    // --- General distress ---
-    "emergency", "disaster", "catastrophe", "crisis", "devastation",
-    "destruction", "danger", "hazard", "warning", "alert",
-    "distress", "calamity", "severe", "desperate",
+    // --- Unambiguous distress ---
+    "disaster", "catastrophe", "calamity", "devastation",
+    "emergency response", "search and rescue", "missing person",
+    "desperate situation",
 ];
 
 /**
- * Returns true if the post text contains at least one disaster-relevant keyword.
+ * Returns true if the post's title + body text contains at least one
+ * disaster-relevant keyword. Flair is intentionally ignored here —
+ * users can set any flair on any post, so flair alone is NOT a reliable
+ * signal. Only the actual text content is checked.
  */
 function isDisasterRelevant(text: string): boolean {
     const lower = text.toLowerCase();
-    return DISASTER_KEYWORDS.some(kw => lower.includes(kw));
+    return DISASTER_KEYWORDS.some(kw => {
+        const regex = new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+        return regex.test(lower);
+    });
 }
 
 // ── Flair → AlertCategory canonical mapping ──────────────────────────────────
@@ -132,7 +144,7 @@ const FLAIR_TO_CATEGORY: Record<string, AlertCategory> = {
 const CATEGORY_LABEL: Record<AlertCategory, string> = {
     MEDICAL: 'Medical',
     RESCUE:  'Rescue',
-    FOOD:    'Food & Water',
+    FOOD:    'Food',
     TRAPPED: 'Trapped',
     GENERAL: 'General',
     OTHER:   'Other',
@@ -266,8 +278,6 @@ export async function fetchRedditAlerts(): Promise<LiveAlert[]> {
 
         // ── NLP keyword gate: only keep disaster-relevant posts ──────────
         const relevantPosts = posts.filter(post => {
-            const flair = (post.link_flair_text ?? "").trim().toLowerCase();
-            if (flair && FLAIR_TO_CATEGORY[flair]) return true;       // flair wins
             const fullText = `${post.title} ${post.selftext}`;
             return isDisasterRelevant(fullText);
         });
