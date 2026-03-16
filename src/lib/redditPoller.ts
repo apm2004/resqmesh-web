@@ -58,6 +58,79 @@ const alertTypeKeywords: Record<string, string[]> = {
     Rescue:  ["trapped", "stranded", "rescue", "collapsed", "buried", "missing"],
 };
 
+// ── Comprehensive disaster-relevance keywords (NLP gate) ─────────────────────
+// A post must contain at least ONE of these keywords in its title or body text.
+// Flair is intentionally ignored — users can set any flair on any post.
+//
+// IMPORTANT: Keep this list SPECIFIC. Avoid broad single words that appear
+// in everyday speech (e.g. "warning", "alert", "missing", "hospital").
+const DISASTER_KEYWORDS: string[] = [
+    // --- Critical / life-threatening ---
+    "trapped", "collapse", "collapsed", "sos", "mayday", "explosion",
+    "gas leak", "casualties", "people died", "urgent rescue",
+    "death toll", "fatalities", "life-threatening",
+
+    // --- Rescue / stranded ---
+    "stranded", "need rescue", "cut off",
+    "buried", "pinned", "help needed", "help us",
+    "please help", "save us", "send help", "need assistance",
+    "rescue needed", "rescue operation",
+
+    // --- Fire ---
+    "wildfire", "fire spreading", "building on fire", "house fire",
+    "blaze", "inferno", "arson", "engulfed in flames",
+    "smoke inhalation", "burning building",
+
+    // --- Flood / water ---
+    "flooded", "flooding", "water rising", "submerged",
+    "waterlogged", "inundated", "flash flood", "dam breach",
+    "levee breach", "overflow",
+
+    // --- Weather / natural disaster ---
+    "earthquake", "quake", "tremor", "aftershock", "tsunami",
+    "cyclone", "hurricane", "typhoon", "tornado",
+    "landslide", "mudslide", "avalanche", "volcanic eruption",
+    "hailstorm", "lightning strike", "drought",
+
+    // --- Medical emergency ---
+    "seriously injured", "critically injured", "ambulance needed",
+    "medical emergency", "trauma victim", "cardiac arrest",
+    "unconscious", "emergency medical", "mass casualty",
+
+    // --- Infrastructure ---
+    "power outage", "grid failure", "blackout", "no electricity",
+    "road blocked", "bridge collapse", "road collapse", "building collapse",
+    "structural damage", "debris",
+
+    // --- Shelter / displacement ---
+    "shelter needed", "displaced", "evacuating", "evacuation order",
+    "relief camp", "temporary shelter",
+
+    // --- Food / water / supplies ---
+    "food supplies", "water supplies", "supplies needed", "rations",
+    "drinking water shortage", "starvation", "dehydration",
+    "no food", "no water", "need food", "need water",
+
+    // --- Unambiguous distress ---
+    "disaster", "catastrophe", "calamity", "devastation",
+    "emergency response", "search and rescue", "missing person",
+    "desperate situation",
+];
+
+/**
+ * Returns true if the post's title + body text contains at least one
+ * disaster-relevant keyword. Flair is intentionally ignored here —
+ * users can set any flair on any post, so flair alone is NOT a reliable
+ * signal. Only the actual text content is checked.
+ */
+function isDisasterRelevant(text: string): boolean {
+    const lower = text.toLowerCase();
+    return DISASTER_KEYWORDS.some(kw => {
+        const regex = new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+        return regex.test(lower);
+    });
+}
+
 // ── Flair → AlertCategory canonical mapping ──────────────────────────────────
 const FLAIR_TO_CATEGORY: Record<string, AlertCategory> = {
     'medical':         'MEDICAL',
@@ -71,7 +144,7 @@ const FLAIR_TO_CATEGORY: Record<string, AlertCategory> = {
 const CATEGORY_LABEL: Record<AlertCategory, string> = {
     MEDICAL: 'Medical',
     RESCUE:  'Rescue',
-    FOOD:    'Food & Water',
+    FOOD:    'Food',
     TRAPPED: 'Trapped',
     GENERAL: 'General',
     OTHER:   'Other',
@@ -140,7 +213,10 @@ function timeAgo(utcSeconds: number): string {
     const minutes = Math.floor(diffMs / 60_000);
     if (minutes < 1)  return "just now";
     if (minutes < 60) return `${minutes} min ago`;
-    return `${Math.floor(minutes / 60)} hr ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days > 1 ? "s" : ""} ago`;
 }
 
 // ── Reddit JSON types ─────────────────────────────────────────────────────────
@@ -200,8 +276,20 @@ export async function fetchRedditAlerts(): Promise<LiveAlert[]> {
             (c: { data: RedditPost }) => c.data
         ) ?? [];
 
-        // Geocode all posts concurrently
-        return await Promise.all(posts.map(redditPostToAlert));
+        // ── NLP keyword gate: only keep disaster-relevant posts ──────────
+        const relevantPosts = posts.filter(post => {
+            const fullText = `${post.title} ${post.selftext}`;
+            return isDisasterRelevant(fullText);
+        });
+
+        if (relevantPosts.length < posts.length) {
+            console.log(
+                `[RedditPoller] NLP filter: ${relevantPosts.length}/${posts.length} posts are disaster-relevant`
+            );
+        }
+
+        // Geocode all relevant posts concurrently
+        return await Promise.all(relevantPosts.map(redditPostToAlert));
     } catch (err) {
         console.error("[RedditPoller] Failed to fetch:", err);
         return [];

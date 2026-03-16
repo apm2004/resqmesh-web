@@ -161,7 +161,8 @@ export default function ActiveResponse({ selectedAlert, onClearSelection }: Acti
                     {selectedAlert.title}
                 </h2>
                 <p className="text-slate-600 dark:text-white/80 text-sm mt-1 leading-relaxed">
-                    {selectedAlert.message}
+                    {selectedAlert.message.split(/Description\s*:\s*/)[1]}
+                    
                 </p>
             </div>
 
