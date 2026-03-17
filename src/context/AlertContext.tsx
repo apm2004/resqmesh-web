@@ -144,6 +144,21 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const markAsResolved = useCallback((alertId: string) => {
+        // ── If it's a Reddit alert, permanently delete from DB + blocklist ──
+        // This prevents the poller from re-inserting it on the next cycle.
+        if (alertId.startsWith("REDDIT-")) {
+            const redditId = alertId.replace(/^REDDIT-/, "");
+            fetch(`${BACKEND}/api/reddit-alerts/${redditId}`, { method: "DELETE" })
+                .then((r) => {
+                    if (r.ok) {
+                        console.log(`[AlertContext] Permanently deleted & blocklisted: ${redditId}`);
+                    } else {
+                        console.warn(`[AlertContext] Backend DELETE failed for ${redditId}:`, r.status);
+                    }
+                })
+                .catch((e) => console.warn(`[AlertContext] DELETE request error for ${redditId}:`, e));
+        }
+
         setActiveAlerts((prev) => {
             const alert = prev.find((a) => a.id === alertId);
             if (!alert) return prev;

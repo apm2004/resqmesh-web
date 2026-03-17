@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LiveAlert } from "@/lib/mockData";
 import { alertConfig } from "@/lib/alertConfig";
+import { useRelativeTime } from "@/lib/useRelativeTime";
 
 interface TriageFeedProps {
     alerts: LiveAlert[];
@@ -32,6 +33,12 @@ const baseButtonClass =
     "px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-md transition-all duration-200 cursor-pointer";
 const inactiveButtonClass =
     "bg-slate-100 dark:bg-black/40 border-slate-300 dark:border-white/10 text-slate-500 dark:text-white/50 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-700 dark:hover:text-white/70";
+
+/** Auto-updating relative timestamp — ticks every 30 s */
+function LiveTime({ createdAt }: { createdAt: number }) {
+    const label = useRelativeTime(createdAt);
+    return <span>{label}</span>;
+}
 
 export default function TriageFeed({
     alerts,
@@ -144,7 +151,7 @@ export default function TriageFeed({
 
                                     {/* Time + location */}
                                     <div className="flex items-center justify-between text-[10px] theme-dim">
-                                        <span>{alert.time}</span>
+                                        <LiveTime createdAt={alert.createdAt} />
                                         <span className="truncate ml-2 max-w-[120px]">
                                             {alert.location}
                                         </span>
